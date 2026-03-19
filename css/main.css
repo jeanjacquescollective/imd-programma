@@ -1,0 +1,394 @@
+/* ===== CSS CUSTOM PROPERTIES ===== */
+:root {
+  --color-green-light: #a8e6a3;
+  --color-green-mid: #7dd87a;
+  --color-green-dark: #4caf50;
+  --color-blue-light: #90caf9;
+  --color-blue-mid: #5b9bd5;
+  --color-blue-dark: #1565c0;
+  --color-purple-light: #ce93d8;
+  --color-purple-mid: #ba68c8;
+  --color-teal-light: #b2dfdb;
+  --color-teal-mid: #80cbc4;
+  --color-bg: #f7f9fc;
+  --color-surface: #ffffff;
+  --color-text: #1a1a2e;
+  --color-text-muted: #5a6a7a;
+  --color-border: #dde3ec;
+  --color-divider: #c5cdd8;
+
+  --font-display: "Syne", sans-serif;
+  --font-body: "DM Sans", sans-serif;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+
+  --shadow-card:
+    0 0.125rem 0.75rem rgba(0, 0, 0, 0.07),
+    0 0.0625rem 0.25rem rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 0.375rem 1.5rem rgba(0, 0, 0, 0.13);
+
+  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --gap-xs: 0.375rem;
+  --gap-sm: 0.625rem;
+  --gap-md: 1rem;
+  --gap-lg: 1.5rem;
+  --gap-xl: 2.5rem;
+}
+
+/* ===== RESET ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  padding: var(--gap-xl) var(--gap-lg);
+}
+
+/* ===== BLOCK: page ===== */
+.page {
+  max-width: 75rem;
+  margin: 0 auto;
+}
+
+/* ===== BLOCK: header ===== */
+.header {
+  margin-bottom: var(--gap-xl);
+  text-align: center;
+}
+
+.header__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--color-text);
+  line-height: 1.1;
+}
+
+.header__title span {
+  background: linear-gradient(135deg, #4caf50 0%, #1565c0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== BLOCK: grid ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--color-surface);
+  box-shadow: 0 0.5rem 2.5rem rgba(0, 0, 0, 0.08);
+}
+
+/* ===== BLOCK: year ===== */
+.year {
+  border-right: 0.125rem solid var(--color-divider);
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.year:last-child {
+  border-right: none;
+}
+
+/* ===== ELEMENT: year__header ===== */
+.year__header {
+  padding: var(--gap-md) var(--gap-md) 0;
+}
+
+.year__title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: var(--gap-md);
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+/* ===== ELEMENT: year__semesters ===== */
+.year__semesters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.year--single .year__semesters {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ===== BLOCK: semester ===== */
+.semester {
+  padding: 0 var(--gap-sm) var(--gap-md);
+  border-right: 0.0625rem dashed var(--color-border);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap-sm);
+}
+
+.semester:last-child {
+  border-right: none;
+}
+
+.semester__label {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: var(--gap-xs) 0 var(--gap-sm);
+}
+
+/* ===== BLOCK: card ===== */
+.card {
+  border-radius: var(--radius-md);
+  padding: 0.6rem 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: center;
+  cursor: default;
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-0.125rem) scale(1.02);
+  box-shadow: var(--shadow-hover);
+  z-index: 2;
+}
+
+.card__subtitle {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 400;
+  opacity: 0.75;
+  margin-bottom: 0.1rem;
+}
+
+.card__title {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: -0.01em;
+}
+
+.card__tag {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 0.25rem;
+  padding: 0.1rem 0.3rem;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+}
+
+/* ===== CARD COLOR MODIFIERS ===== */
+.card--green {
+  background: linear-gradient(135deg, #c8f5c4 0%, #a5e8a0 100%);
+  color: #1b4a1a;
+  border: 0.0625rem solid #8ed88a;
+}
+
+.card--green-dark {
+  background: linear-gradient(135deg, #7dd87a 0%, #58c754 100%);
+  color: #103410;
+  border: 0.0625rem solid #4db84a;
+}
+
+.card--green-dark .card__title {
+  color: #0d2b0d;
+}
+
+.card--blue {
+  background: linear-gradient(135deg, #b3d9ff 0%, #85bef5 100%);
+  color: #0d2a4a;
+  border: 0.0625rem solid #6aaae0;
+}
+
+.card--blue-dark {
+  background: linear-gradient(135deg, #5b9bd5 0%, #3d7fc0 100%);
+  color: #ffffff;
+  border: 0.0625rem solid #2d6aaa;
+}
+
+.card--purple {
+  background: linear-gradient(135deg, #e0b8f0 0%, #ce93d8 100%);
+  color: #3a0a4a;
+  border: 0.0625rem solid #bb7acc;
+}
+
+.card--purple-dark {
+  background: linear-gradient(135deg, #ba68c8 0%, #9c45b8 100%);
+  color: #ffffff;
+  border: 0.0625rem solid #8a32a8;
+}
+
+.card--teal {
+  background: linear-gradient(135deg, #c8f0ec 0%, #9dddd6 100%);
+  color: #0d3633;
+  border: 0.0625rem solid #7cccc4;
+}
+
+.card--teal-dark {
+  background: linear-gradient(135deg, #80cbc4 0%, #55b5ac 100%);
+  color: #042422;
+  border: 0.0625rem solid #42a09a;
+}
+
+/* tall card: spans multiple rows using grid-row */
+.card--tall {
+  display: grid;
+  place-items: center;
+  grid-row: span 2;
+  min-height: 7rem;
+}
+
+.card--extra-tall {
+  display: grid;
+  place-items: center;
+  grid-row: span 15;
+  min-height: 7rem;
+}
+
+/* ===== BLOCK: semester--stage for the stage column ===== */
+.semester--stage {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap-sm);
+}
+
+/* ===== BLOCK: card-stack (cards with embedded tag) ===== */
+.card-stack {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap-xs);
+}
+
+/* ===== LEGEND ===== */
+.legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--gap-md);
+  justify-items: center;
+  margin-top: var(--gap-xl);
+}
+
+.legend__item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.legend__dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 62rem) {
+  body {
+    padding: var(--gap-lg) var(--gap-md);
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    border-radius: var(--radius-lg);
+  }
+
+  .year {
+    border-right: none;
+    border-bottom: 0.125rem solid var(--color-divider);
+  }
+
+  .year:last-child {
+    border-bottom: none;
+  }
+}
+
+@media (max-width: 30rem) {
+  body {
+    padding: var(--gap-md) var(--gap-sm);
+  }
+
+  .year__semesters {
+    grid-template-columns: 1fr;
+  }
+
+  .semester {
+    border-right: none;
+    border-bottom: 0.0625rem dashed var(--color-border);
+    padding-bottom: var(--gap-md);
+  }
+
+  .semester:last-child {
+    border-bottom: none;
+  }
+
+  .card {
+    font-size: 0.82rem;
+    padding: 0.75rem 0.6rem;
+  }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.year {
+  animation: fadeUp 0.5s ease both;
+}
+
+.year:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.year:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.year:nth-child(3) {
+  animation-delay: 0.25s;
+}
