@@ -1,0 +1,1 @@
+export default function Textarea(props){return <textarea {...props} class="border p-2 rounded w-full"/>}

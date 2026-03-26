@@ -1,0 +1,1 @@
+export default function CourseGrid({children}){return <div class="grid grid-cols-3 gap-4 auto-rows-[60px]">{children}</div>}

@@ -1,0 +1,1 @@
+export default function CourseCard({course}){return <div class="p-4 bg-white shadow rounded">{course.course_name}</div>}

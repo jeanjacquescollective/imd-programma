@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from scraper import scrape_ects, scrape_studies, scrape_trajects, scrape_years
 
 st.title("ECTS Vakken Scraper")
@@ -36,7 +37,7 @@ if st.session_state.stage == "vakken":
     st.write("Kies trajects:")
     selected_trajects = []
     for traject in st.session_state.trajects:
-        col1, col2 = st.columns([0.3, 0.7])
+        col1, col2 = st.columns([0.1, 0.9])
         with col1:
             if st.checkbox(traject, key=traject, label_visibility="collapsed"):
                 selected_trajects.append(traject)
@@ -46,24 +47,14 @@ if st.session_state.stage == "vakken":
     if st.button("Scrape Vakken"):
         if selected_trajects:
             with st.spinner("Bezig met scrapen..."):
-                df = scrape_ects(study, academicyear, selected_trajects)
+                result = scrape_ects(study, academicyear, selected_trajects)
+                df = pd.DataFrame(result)
                 st.dataframe(df)
                 st.download_button(
                     label="Download als CSV",
                     data=df.to_csv(index=False).encode("utf-8"),
-                    file_name="vakken.csv",
+                    file_name="vakken-"+academicyear.replace("/", "-")+"-"+"".join(selected_trajects).replace(" ", "-")+".csv",
                     mime="text/csv"
                 )
         else:
             st.warning("Selecteer minstens één traject")
-
-# if st.button("Scrape Vakken"):
-#     with st.spinner("Bezig met scrapen..."):
-#         df = scrape_ects(study, academicyear)
-#         st.dataframe(df)
-#         st.download_button(
-#             label="Download als CSV",
-#             data=df.to_csv(index=False).encode("utf-8"),
-#             file_name="vakken.csv",
-#             mime="text/csv"
-#         )

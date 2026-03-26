@@ -1,0 +1,1 @@
+export default function Dropzone(){return <div class="border-2 border-dashed p-6 text-center">Drop CSV Here</div>}

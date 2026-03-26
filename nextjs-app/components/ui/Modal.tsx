@@ -1,0 +1,1 @@
+export default function Modal({children}){return <div class="fixed inset-0 bg-black/40 flex items-center justify-center">{children}</div>}

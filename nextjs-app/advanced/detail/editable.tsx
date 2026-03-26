@@ -1,0 +1,1 @@
+export default function Editable(){return <div>Editable</div>}

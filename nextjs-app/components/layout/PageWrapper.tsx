@@ -1,0 +1,1 @@
+export default function PageWrapper({children}){return <div class="max-w-6xl mx-auto p-6">{children}</div>}

@@ -1,0 +1,1 @@
+export default function Card({children}){return <div class="p-4 shadow bg-white rounded">{children}</div>}
