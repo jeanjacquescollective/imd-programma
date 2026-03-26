@@ -51,12 +51,20 @@ export default function CoursesPage() {
     const usedColors = [];
 
     coursesData.forEach(course => {
+      try {
+        if (!course.course_name) {
+          console.warn("Course with missing name found:", course);
+          return;
+        }
       const category = getCourseCategory(course.course_name);
       const palette = COLOR_PALETTES[category];
       const colorIndex = usedColors.filter(c => c.category === category).length % palette.length;
       const color = palette[colorIndex];
       courseColors[course.course_name] = { color, category };
       usedColors.push({ category, color });
+      } catch (error) {
+        console.error("Error processing course:", course, error);
+      }
     });
 
     coursesData.forEach(course => {

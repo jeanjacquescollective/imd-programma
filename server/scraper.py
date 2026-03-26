@@ -105,8 +105,9 @@ def extract_course_data(html_content):
     calendar = None
     calendar = label_next("Kalender:", next_tag="span")
     print(f"Debug: Raw calendar value for '{course_name}': {calendar}")
-    if calendar and ("Semester 5" in calendar and "Semester 6" in calendar):
-        calendar = "Semester 6"
+    if calendar and "of" in calendar:
+        semesters = calendar.split("of")
+        calendar = semesters[-1].strip()
     elif calendar:
         match = re.search(r'Semester\s+(\d+)', calendar)
         if match:

@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from scraper import scrape_ects, scrape_studies, scrape_trajects, scrape_years
 
+print("Starting ECTS Scraper...")   
+
 st.title("ECTS Vakken Scraper")
 
 if "studies" not in st.session_state:
