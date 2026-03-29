@@ -1,7 +1,5 @@
 import "./globals.css";
 
-
-
 export const metadata = {
   title: "IMD Curriculum Manager",
   description: "Manage IMD courses, ECTS and reports",
