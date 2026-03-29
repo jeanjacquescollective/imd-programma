@@ -100,14 +100,27 @@ def extract_course_data(html_content):
     second_exam          = label_next("Tweede examenkans",           next_tag="b")
     teachers             = label_next("Docenten",                    next_tag="span")
     language             = label_next("Onderwijstalen",              next_tag="span")
-    specific_study_program = soup.find("div", string=lambda s: s and "Keuzeoptie:" in s) is not None
+    # specific_study_program = soup.find("div", string=lambda s: s and "Keuzeoptie:" in s) is not None
     # Calendar — sometimes there are multiple (e.g., "Semester 5" or "Semester 6"), grab the last one
+    study_programs = None
+    keuzeoptie_div = soup.find("div", string=lambda s: s and "Keuzeoptie:" in s)
+    if keuzeoptie_div:
+        next_div = keuzeoptie_div.find_next("div")
+        if next_div:
+            ul = next_div.find("ul")
+            if ul:
+                li_elements = ul.find_all("li")
+                if len(li_elements) >= 1:
+                    study_programs = [li.get_text(strip=True) for li in li_elements]
     calendar = None
     calendar = label_next("Kalender:", next_tag="span")
     print(f"Debug: Raw calendar value for '{course_name}': {calendar}")
     if calendar and "of" in calendar:
         semesters = calendar.split("of")
-        calendar = semesters[-1].strip()
+        if(semesters[-1].strip().lower() == "semester 5" or semesters[-1].strip().lower() == "semester 6"):
+            calendar = semesters[-1].strip()
+        if(semesters[0].strip().lower() == "semester 1" or semesters[0].strip().lower() == "semester 2"):
+            calendar = semesters[0].strip()
     elif calendar:
         match = re.search(r'Semester\s+(\d+)', calendar)
         if match:
@@ -246,7 +259,7 @@ def extract_course_data(html_content):
         "course_name":          course_name,
         "academic_year":        academic_year,
         "study_program":        study_program,
-        "specific_study_program": specific_study_program,
+        "study_programs":       study_programs,
         "trajectschijf":        trajectschijf,
         "study_load":           study_load,
         "total_study_time":     total_study_time,
