@@ -59,6 +59,7 @@ export function DataBootstrap() {
               ectsByTraject[trajectKey].push(row);
             }
             localStorage.setItem("ECTS", JSON.stringify(ectsByTraject));
+            window.location.reload();
           },
         });
       })
