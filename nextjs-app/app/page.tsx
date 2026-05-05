@@ -13,7 +13,7 @@ export default function Home() {
    const data = localStorage.getItem('ECTS');
         if (data) {
             const trajectsData: TrajectsData = JSON.parse(data);
-            setTrajects(Object.keys(trajectsData));
+            setTrajects(Object.keys(trajectsData).filter((k) => !k.toLowerCase().includes("unknown")));
         }
     setHasLoadedTrajects(true);
   }, []);
@@ -50,6 +50,7 @@ export default function Home() {
           )}
           {trajects.map((slug) => {
             const key = `traject_${slug}`;
+
             return (
               <Link
                 key={key}

@@ -13,7 +13,7 @@ export default function TrajectPage() {
         const data = localStorage.getItem('ECTS');
         if (data) {
             const trajectsData: TrajectsData = JSON.parse(data);
-            setTrajects(Object.keys(trajectsData));
+            setTrajects(Object.keys(trajectsData).filter((k) => !k.toLowerCase().includes("unknown")));
         }
         setLoading(false);
     }, []);
