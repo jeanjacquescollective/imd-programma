@@ -1,3 +1,5 @@
+import re
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
@@ -12,17 +14,30 @@ from selenium.common.exceptions import StaleElementReferenceException, NoSuchEle
 driver = webdriver.Firefox(service=Service(GeckoDriverManager().install()))
 driver.get("https://ects.arteveldehogeschool.be/ahsownapp/ects/ECTSEasy.aspx")
 
+def driver_check():
+    global driver
+    try:
+        driver.title  # Probeer een eenvoudige actie uit te voeren
+    except Exception:
+        print("WebDriver is niet beschikbaar. Herstarten...")
+        driver.quit()
+        driver = webdriver.Firefox(service=Service(GeckoDriverManager().install()))
+        driver.get("https://ects.arteveldehogeschool.be/ahsownapp/ects/ECTSEasy.aspx")
+
 def scrape_years():
+    driver_check()
     select_year = Select(driver.find_element(By.ID, "ctl00_contentPlaceHolder_modelSearchOLODS_ddlAcademiejaar"))
     academicyears = [option.text for option in select_year.options if option.text != "Kies een academiejaar"]
     return academicyears
 
 def scrape_studies():
+    driver_check()
     select_study = Select(driver.find_element(By.ID, "ctl00_contentPlaceHolder_modelSearchOLODS_ddlOpleiding"))
     studies = [option.text for option in select_study.options if option.text != "Kies een opleiding"]
     return studies
 
 def scrape_trajects(study: str, year: str):
+    driver_check()
     try:
         jaar_dropdown = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "ctl00_contentPlaceHolder_modelSearchOLODS_ddlAcademiejaar"))
@@ -101,7 +116,7 @@ def extract_course_data(html_content):
     teachers             = label_next("Docenten",                    next_tag="span")
     language             = label_next("Onderwijstalen",              next_tag="span")
     # specific_study_program = soup.find("div", string=lambda s: s and "Keuzeoptie:" in s) is not None
-    # Calendar — sometimes there are multiple (e.g., "Semester 5" or "Semester 6"), grab the last one
+    # semester — sometimes there are multiple (e.g., "Semester 5" or "Semester 6"), grab the last one
     study_programs = None
     keuzeoptie_div = soup.find("div", string=lambda s: s and "Keuzeoptie:" in s)
     if keuzeoptie_div:
@@ -112,26 +127,26 @@ def extract_course_data(html_content):
                 li_elements = ul.find_all("li")
                 if len(li_elements) >= 1:
                     study_programs = [li.get_text(strip=True) for li in li_elements]
-    calendar = None
-    calendar = label_next("Kalender:", next_tag="span")
-    print(f"Debug: Raw calendar value for '{course_name}': {calendar}")
-    if calendar and "of" in calendar:
-        semesters = calendar.split("of")
-        if(semesters[-1].strip().lower() == "semester 5" or semesters[-1].strip().lower() == "semester 6"):
-            calendar = semesters[-1].strip()
+    semester = None
+    semester = label_next("Kalender:", next_tag="span")
+    print(f"Debug: Raw semester value for '{course_name}': {semester}")
+    if semester and "of" in semester:
+        semesters = semester.split("of")
+        if(semesters[0].strip().lower() == "semester 5" or semesters[0].strip().lower() == "semester 3"):
+            semester = semesters[-1].strip()[-1]  # Get the number from "Semester 5" or "Semester 3"
         if(semesters[0].strip().lower() == "semester 1" or semesters[0].strip().lower() == "semester 2"):
-            calendar = semesters[0].strip()
-    elif calendar:
-        match = re.search(r'Semester\s+(\d+)', calendar)
+            semester = semesters[0].strip()[-1]  # Get the number from "Semester 1" or "Semester 2"
+    elif semester:
+        match = re.search(r'Semester\s+(\d+)', semester)
         if match:
-            calendar = match.group(1)
+            semester = match.group(1)
    
 
-    # Distribution of choice courses (keuzevak) across semesters
-    if "keuzevak" in (course_name or "").lower():
-        match = re.search(r'\d+', course_name)
-        if match:
-            calendar = match.group(0)
+    # # Distribution of choice courses (keuzevak) across semesters
+    # if "keuzevak" in (course_name or "").lower():
+    #     match = re.search(r'\d+', course_name)
+    #     if match:
+    #         semester = match.group(0)
     # ── Learning outcomes ─────────────────────────────────────────────────
 
     learning_outcomes = []
@@ -151,13 +166,13 @@ def extract_course_data(html_content):
     # The "Omschrijving Inhoud" section is a <h4> followed by free HTML
     content_text = None
     inhoud_header = soup.find("h4", string=lambda s: s and "Inhoud" in s)
+
     if inhoud_header:
         parts = []
         for sibling in inhoud_header.find_next_siblings():
-            # Stop at the next h4 section
             if sibling.name == "h4":
                 break
-            parts.append(sibling.get_text(" ", strip=True))
+            parts.append(sibling.decode_contents())
         content_text = "\n".join(p for p in parts if p)
 
     # ── Study materials ───────────────────────────────────────────────────
@@ -268,7 +283,7 @@ def extract_course_data(html_content):
         "second_exam":          second_exam,
         "teachers":             teachers,
         "language":             language,
-        "calendar":             calendar,
+        "semester":             semester,
         "content":              content_text,
         "learning_outcomes":    learning_outcomes,
         "study_materials":      study_materials,
@@ -278,42 +293,8 @@ def extract_course_data(html_content):
         "evaluation_text":      evaluation_text,
     }
 
-# def scrape_ects(study: str, academicYear: str, trajects: list):
-    select_jaar = Select(driver.find_element(By.ID, "ctl00_contentPlaceHolder_modelSearchOLODS_ddlAcademiejaar"))
-    select_jaar.select_by_visible_text(academicYear)
-
-    select_opleiding = Select(driver.find_element(By.ID, "ctl00_contentPlaceHolder_modelSearchOLODS_ddlOpleiding"))
-    select_opleiding.select_by_visible_text(study)
-
-    select_traject = Select(driver.find_element(By.ID, "ctl00_contentPlaceHolder_modelSearchOLODS_ddlTraject"))
-
-    all_courses_data = []
-
-    for traject in trajects:
-        select_traject.select_by_visible_text(traject)
-        driver.find_element(By.ID, "ctl00_contentPlaceHolder_modelSearchOLODS_btnZoekOpleidingsonderdelen").click()
-        time.sleep(3)
-
-        tables = driver.find_elements(By.CSS_SELECTOR, "#ctl00_contentPlaceHolder_treeViewOLODS_treeViewOpleidingsonderdelen table")
-        for table in tables:
-            link = table.find_element(By.CSS_SELECTOR, "a.fancybox")
-            traject_page_url = link.get_attribute("href")
-            driver.get(traject_page_url)
-
-            
-            time.sleep(1)
-            print(f"Scraping course data for traject '{traject}'...")
-            
-            
-            course_data = extract_course_data(driver.page_source)
-            driver.switch_to.default_content()
-            all_courses_data.append(course_data)
-
-            time.sleep(1)
-
-    driver.quit()
-    return all_courses_data
 def scrape_ects(study: str, academicYear: str, trajects: list):
+    driver_check()
     BASE = "https://ects.arteveldehogeschool.be"
     wait = WebDriverWait(driver, 10)
 
@@ -366,7 +347,7 @@ def scrape_ects(study: str, academicYear: str, trajects: list):
                 wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
                 wait.until(EC.presence_of_element_located((By.ID, "ctl00_ctl00_cphGeneral_cphMain_dStudiegidsTitle")))
                 course_data = extract_course_data(driver.page_source)
-                course_data["traject"] = traject
+                course_data["traject"] = traject.split(" - ")[0]
                 course_data["source_url"] = url
                 all_courses_data.append(course_data)
 
@@ -378,22 +359,43 @@ def scrape_ects(study: str, academicYear: str, trajects: list):
                 driver.switch_to.window(driver.window_handles[0])
 
     driver.quit()
+    # Check and assign semesters based on study load if missing
+    semesters_load = {}
+    # First, sum up loads for courses that already have a semester assigned
+    for course in all_courses_data:
+        if not course.get("semester") and course.get("trajectschijf"):
+            trajectschijf = int(course["trajectschijf"])
+            semester = (trajectschijf-1) * 2
+            
+            # Extract number from course name
+            match = re.search(r'\d+', course.get("course_name", ""))
+            if match:
+                semester += int(match.group(0))
+            
+            course["semester"] = str(semester)
+
+    for course in all_courses_data:
+        if course.get("semester"):
+            load = course.get("study_load", "")
+            match = re.search(r'(\d+)', load)
+            study_points = int(match.group(1)) if match else 0
+            sem = int(course["semester"])
+            semesters_load[sem] = semesters_load.get(sem, 0) + study_points
+    
+    # Then, assign semesters to courses that don't have one yet
+    for course in all_courses_data:
+        if not course.get("semester"):
+            load = course.get("study_load", "")
+            match = re.search(r'(\d+)', load)
+            study_points = int(match.group(1)) if match else 0
+            
+            # Find first semester with space
+            for sem in range(1, 7):
+                current_load = semesters_load.get(sem, 0)
+                if current_load + study_points <= 30:
+                    course["semester"] = str(sem)
+                    semesters_load[sem] = current_load + study_points
+                    break
     return all_courses_data
 if __name__ == "__main__":
     print("Starting scraper...")
-    # studies = scrape_studies()
-    # years = scrape_years()
-
-    # study = "Interactive Media Development"
-    # year = "2025-26"
-
-    # if study in studies and year in years:
-    #     trajects = scrape_trajects(study, year)
-    #     courses_data = scrape_ects(study, year, trajects)
-
-    #     # Convert to DataFrame and save as CSV
-    #     df = pd.DataFrame(courses_data)
-    #     df.to_csv('courses_data.csv', index=False)
-    #     print("Data saved to courses_data.csv")
-    # else:
-    #     print(f"Study '{study}' or year '{year}' not found.")

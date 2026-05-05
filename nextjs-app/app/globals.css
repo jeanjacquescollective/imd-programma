@@ -72,3 +72,19 @@
     box-shadow: var(--imd-shadow-hover);
   }
 }
+
+ul {
+  @apply list-disc list-inside;
+}
+
+ul li {
+  @apply mb-1;
+}
+
+ul li:last-child {
+  @apply mb-0;
+}
+
+ul  ul {
+  @apply ml-4;
+}
