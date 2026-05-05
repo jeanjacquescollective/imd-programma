@@ -10,9 +10,9 @@ interface Props {
 
 export function YearColumn({ yearKey, yearNumber, placement }: Props) {
   return (
-    <div className="mb-8 col-span-2 flex flex-col min-h-0">
+    <div className="mb-8 col-span-2 grid min-h-0 grid-rows-[auto_minmax(0,1fr)]">
       <h2 className="text-2xl font-bold mb-4">Jaar {yearNumber}</h2>
-      <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
+      <div className="grid min-h-0 grid-cols-2 gap-4">
         {SEM_KEYS.map((sk) => (
           <SemesterColumn
             key={sk}

@@ -12,6 +12,7 @@ type TrajectsData = Record<string, RawCourse[]>;
 export default function TrajectPage() {
     const [loading, setLoading] = useState(true);
     const [rawCourses, setRawCourses] = useState<RawCourse[]>([]);
+    const [trajectYear, setTrajectYear] = useState<string | null>(null);
         const [trajectName, setTrajectName] = useState("");
         const params = useParams<{ slug: string | string[] }>();
         const slug = useMemo(
@@ -20,17 +21,23 @@ export default function TrajectPage() {
         );
     const { courses, layout } = useCourseLayout(rawCourses);
 
+
+
     useEffect(() => {
                 const trajectsData: TrajectsData = getTrajectCoursesFromStorage();
                 const matchedName = Object.keys(trajectsData).find(
                     (name) => encodeURIComponent(name) === slug || name === slug
                 );
+                const matchedYearValue = matchedName ? trajectsData[matchedName]?.[0]?.academic_year : null;
+                const matchedYear = matchedYearValue != null ? String(matchedYearValue) : null;
 
                 if (matchedName) {
                     setTrajectName(matchedName);
+                    setTrajectYear(matchedYear);
                     setRawCourses(trajectsData[matchedName] || []);
                 } else {
                     setTrajectName(decodeURIComponent(slug || ""));
+                    setTrajectYear(null);
                     setRawCourses([]);
                 }
 
@@ -45,7 +52,7 @@ export default function TrajectPage() {
 
     return (
         <div className="p-6">
-            <h1 className="text-3xl font-bold mb-6">{trajectName}</h1>
+            <h1 className="text-3xl font-bold mb-6">{trajectName} - {trajectYear} </h1>
             <CourseGrid courses={courses} layout={layout} />
         </div>
     );

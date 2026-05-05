@@ -10,7 +10,7 @@ import {
   SEM_KEYS,
   type CourseEntry,
   type Placement,
-} from "../../lib/courseLayout";
+} from "@/lib/courseLayout";
 import SemesterColumn from "../../components/course/CourseGrid";
 
 type StructuredCourses = Record<string, Record<string, CourseEntry[]>>;

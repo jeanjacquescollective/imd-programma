@@ -144,35 +144,52 @@ export default function CourseDetail() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto pt-16 pb-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-4xl font-bold">{editedCourse.course_name}</h1>
-        <ActionBar
+    <div className="mx-auto max-w-6xl px-4 pb-10 pt-10 sm:px-6 lg:px-8">
+      <div className="mb-8 rounded-[2rem] border border-[rgba(197,205,216,0.82)] bg-[linear-gradient(135deg,rgba(255,255,255,0.96)_0%,rgba(244,247,251,0.88)_100%)] p-6 shadow-[0_1rem_3rem_rgba(15,23,42,0.08)]">
+        <div className="mb-3 inline-flex rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          Cursusdetail
+        </div>
+        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h1 className="text-4xl font-bold tracking-[-0.03em] text-slate-900">{editedCourse.course_name}</h1>
+            <p className="mt-2 text-sm text-slate-600">
+              {editedCourse.study_load} studiepunten
+              {editedCourse.language ? ` • ${editedCourse.language}` : ""}
+            </p>
+          </div>
+          <ActionBar
+            isEditing={isEditing}
+            onToggleEdit={toggleEdit}
+            onSave={save}
+            onBack={() => router.push("/courses")}
+          />
+        </div>
+
+        <MetaGrid
+          course={editedCourse}
           isEditing={isEditing}
-          onToggleEdit={toggleEdit}
-          onSave={save}
-          onBack={() => router.push("/courses")}
+          onChange={handleInputChange}
         />
       </div>
 
-      <MetaGrid
-        course={editedCourse}
-        isEditing={isEditing}
-        onChange={handleInputChange}
-      />
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.9fr)]">
+        <div>
+          <ContentSection
+            course={editedCourse}
+            isEditing={isEditing}
+            onChange={handleInputChange}
+          />
+        </div>
 
-      <ContentSection
-        course={editedCourse}
-        isEditing={isEditing}
-        onChange={handleInputChange}
-      />
-
-      <LearningOutcomesSection
-        outcomes={Array.isArray(editedCourse.learning_outcomes) ? editedCourse.learning_outcomes : []}
-        isEditing={isEditing}
-        onChange={handleLearningOutcomeChange}
-        onAdd={addLearningOutcome}
-      />
+        <div>
+          <LearningOutcomesSection
+            outcomes={Array.isArray(editedCourse.learning_outcomes) ? editedCourse.learning_outcomes : []}
+            isEditing={isEditing}
+            onChange={handleLearningOutcomeChange}
+            onAdd={addLearningOutcome}
+          />
+        </div>
+      </div>
 
       <EvaluationSection
         evaluations={Array.isArray(editedCourse.evaluation) ? editedCourse.evaluation : []}

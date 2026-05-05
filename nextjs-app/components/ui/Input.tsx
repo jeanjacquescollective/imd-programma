@@ -1,1 +1,0 @@
-export default function Input(props){return <input {...props} class="border p-2 rounded w-full"/>}

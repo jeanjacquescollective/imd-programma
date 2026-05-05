@@ -132,8 +132,10 @@ def extract_course_data(html_content):
     print(f"Debug: Raw semester value for '{course_name}': {semester}")
     if semester and "of" in semester:
         semesters = semester.split("of")
-        if(semesters[0].strip().lower() == "semester 5" or semesters[0].strip().lower() == "semester 3"):
+        if(semesters[0].strip().lower() == "semester 5" or semesters[-1].strip().lower() == "semester 6"):
             semester = semesters[-1].strip()[-1]  # Get the number from "Semester 5" or "Semester 3"
+        if semesters[0].strip().lower() == "semester 3" or semesters[-1].strip().lower() == "semester 4":
+            semester = semesters[0].strip()[-1]  # Get the number from "Semester 3" or "Semester 4"
         if(semesters[0].strip().lower() == "semester 1" or semesters[0].strip().lower() == "semester 2"):
             semester = semesters[0].strip()[-1]  # Get the number from "Semester 1" or "Semester 2"
     elif semester:
@@ -371,6 +373,8 @@ def scrape_ects(study: str, academicYear: str, trajects: list):
             match = re.search(r'\d+', course.get("course_name", ""))
             if match:
                 semester += int(match.group(0))
+            else:
+                semester += 1  # Default to first semester of the trajectschijf if no number found
             
             course["semester"] = str(semester)
 

@@ -7,24 +7,24 @@ interface Props {
 
 export function ActionBar({ isEditing, onToggleEdit, onSave, onBack }: Props) {
   return (
-    <div className="flex justify-between items-center mb-6">
+    <div className="flex flex-wrap items-center justify-between gap-3">
       <button
         onClick={onToggleEdit}
-        className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+        className="rounded-full border border-slate-300 bg-white/85 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-white"
       >
         {isEditing ? "Annuleren" : "Bewerken"}
       </button>
       {isEditing ? (
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={onSave}
-            className="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="rounded-full border border-[#2d6aaa] bg-[linear-gradient(135deg,#5b9bd5_0%,#3d7fc0_100%)] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           >
             Opslaan
           </button>
           <button
             onClick={onBack}
-            className="px-6 py-3 bg-gray-700 text-white rounded hover:bg-gray-800"
+            className="rounded-full border border-slate-300 bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
           >
             Terug
           </button>
@@ -32,7 +32,7 @@ export function ActionBar({ isEditing, onToggleEdit, onSave, onBack }: Props) {
       ) : (
         <a
           href="/courses"
-          className="px-6 py-3 bg-gray-700 text-white rounded hover:bg-gray-800 inline-block"
+          className="inline-block rounded-full border border-slate-300 bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
         >
           Terug
         </a>

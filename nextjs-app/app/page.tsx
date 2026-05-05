@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 export default function Home() {
   const [trajects, setTrajects] = useState<{ slug: string; name: string }[]>([]);
+  const [hasLoadedTrajects, setHasLoadedTrajects] = useState(false);
 
   useEffect(() => {
     const storedTrajects = Object.entries(localStorage)
@@ -14,6 +15,7 @@ export default function Home() {
         return { slug: key.replace("traject_", ""), name: traject.name };
       });
     setTrajects(storedTrajects);
+    setHasLoadedTrajects(true);
   }, []);
 
   return (
@@ -26,19 +28,17 @@ export default function Home() {
           CSV Uploaden
         </Link>
 
-        <Link href="/courses">
-          Dataset Laden
+        <Link href="/trajects">
+          Trajecten bekijken
         </Link>
       </div>
 
       <div className="mt-12">
         <h2 className="text-2xl font-bold mb-4">Mijn Trajecten</h2>
         <div className="space-y-2">
-          {typeof window !== "undefined" && 
-            trajects.length === 0 && (
-              <p className="text-gray-500">Geen trajecten gevonden. Upload een CSV om te beginnen!</p>
-            )
-          }
+          {hasLoadedTrajects && trajects.length === 0 && (
+            <p className="text-gray-500">Geen trajecten gevonden. Upload een CSV om te beginnen!</p>
+          )}
           {trajects.map(({ slug, name }) => {
             const key = `traject_${slug}`;
             return (

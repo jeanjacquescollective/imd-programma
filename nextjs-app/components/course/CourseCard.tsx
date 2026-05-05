@@ -1,6 +1,5 @@
 import Link from "next/link";
-import type { PlacedCourse } from "../../lib/courseLayout";
-
+import type { PlacedCourse } from "@/types/course";
 export default function CourseCard({ course, rowStart, rowSpan }: PlacedCourse) {
   return (
     <Link

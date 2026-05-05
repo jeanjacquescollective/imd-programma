@@ -8,11 +8,13 @@ interface Props {
 }
 
 export function SemesterColumn({ semKey, entries, totalRows }: Props) {
+
+  
   return (
-    <div className="bg-gray-100 rounded flex flex-col p-0 flex-1 min-h-0 h-full">
+    <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] p-0">
       <h3 className="text-xl font-semibold mb-2">{semKey}</h3>
       <div
-      className="flex-1 min-h-0"
+      className="min-h-0"
       style={{
         display: "grid",
         gridTemplateRows: `repeat(${totalRows}, 1fr)`,
