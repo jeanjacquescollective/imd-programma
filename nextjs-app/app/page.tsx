@@ -1,20 +1,20 @@
 "use client";
 
+import { Course } from "@/types/course";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+type TrajectsData = Record<string, Course[]>;
 
 export default function Home() {
-  const [trajects, setTrajects] = useState<{ slug: string; name: string }[]>([]);
+  const [trajects, setTrajects] = useState<string[]>([]);
   const [hasLoadedTrajects, setHasLoadedTrajects] = useState(false);
 
   useEffect(() => {
-    const storedTrajects = Object.entries(localStorage)
-      .filter(([key]) => key.startsWith("traject_"))
-      .map(([key, value]) => {
-        const traject = JSON.parse(value);
-        return { slug: key.replace("traject_", ""), name: traject.name };
-      });
-    setTrajects(storedTrajects);
+   const data = localStorage.getItem('ECTS');
+        if (data) {
+            const trajectsData: TrajectsData = JSON.parse(data);
+            setTrajects(Object.keys(trajectsData));
+        }
     setHasLoadedTrajects(true);
   }, []);
 
@@ -39,11 +39,11 @@ export default function Home() {
           {hasLoadedTrajects && trajects.length === 0 && (
             <p className="text-gray-500">Geen trajecten gevonden. Upload een CSV om te beginnen!</p>
           )}
-          {trajects.map(({ slug, name }) => {
+          {trajects.map((slug) => {
             const key = `traject_${slug}`;
             return (
-                  <Link key={key} href={`/traject/${slug}`} className="block p-3 bg-blue-50 hover:bg-blue-100 rounded">
-                    {name}
+                  <Link key={key} href={`/trajects/${encodeURIComponent(slug)}`} className="block p-3 bg-blue-50 hover:bg-blue-100 rounded">
+                    {slug}
                   </Link>
                 );
               })
