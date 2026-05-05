@@ -3,6 +3,72 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply font-sans;
+@layer base {
+  html,
+  body {
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  :root {
+    --imd-bg: #f4f7fb;
+    --imd-surface: rgba(255, 255, 255, 0.88);
+    --imd-border: rgba(148, 163, 184, 0.22);
+    --imd-text: #142033;
+    --imd-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+    --imd-shadow-hover: 0 18px 40px rgba(15, 23, 42, 0.16);
+  }
+
+  * {
+    @apply border-slate-200;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-body), sans-serif;
+    color: var(--imd-text);
+    background:
+      radial-gradient(circle at top left, rgba(125, 216, 122, 0.18), transparent 28%),
+      radial-gradient(circle at top right, rgba(91, 155, 213, 0.16), transparent 24%),
+      linear-gradient(180deg, #f8fbff 0%, var(--imd-bg) 50%, #eef3f8 100%);
+    min-height: 100vh;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display), sans-serif;
+  }
+
+  ::selection {
+    background: rgba(76, 175, 80, 0.22);
+  }
+}
+
+@layer components {
+  .imd-shell {
+    @apply mx-auto min-h-screen max-w-[88rem] px-4 py-4 sm:px-6 lg:px-8;
+  }
+
+  .imd-panel {
+    backdrop-filter: blur(18px);
+  }
+
+  .imd-card-hover {
+    transition:
+      transform 220ms cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow 220ms cubic-bezier(0.4, 0, 0.2, 1),
+      border-color 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .imd-card-hover:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: var(--imd-shadow-hover);
+  }
 }

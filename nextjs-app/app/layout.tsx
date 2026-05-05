@@ -1,6 +1,15 @@
+import { DM_Sans, Syne } from "next/font/google";
 import "./globals.css";
 
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-body",
+});
 
+const syne = Syne({
+  subsets: ["latin"],
+  variable: "--font-display",
+});
 
 export const metadata = {
   title: "IMD Curriculum Manager",
@@ -10,7 +19,7 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-gray-100 min-h-screen text-gray-800">
+      <body className={`${dmSans.variable} ${syne.variable} min-h-screen text-slate-900`}>
         {children}
       </body>
     </html>
