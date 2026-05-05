@@ -56,35 +56,42 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto pt-16">
-      <h1 className="text-3xl font-bold mb-6">CSV Uploaden</h1>
-      <div
-        className={`border-2 border-dashed p-10 rounded text-center ${
-          dragOver ? "bg-blue-50 border-blue-400" : "border-gray-400"
-        }`}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragOver(false);
-          const file = e.dataTransfer.files[0];
-          if (file) handleFile(file);
-        }}
-      >
-        <p className="text-lg">Sleep hier je CSV</p>
-      </div>
+    <div className="imd-page">
+      <section className="imd-hero mb-8">
+        <h1 className="text-4xl font-bold tracking-[-0.03em] text-slate-900">CSV uploaden</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">Sleep een exportbestand in de zone hieronder. De trajecten worden lokaal opgeslagen en zijn daarna meteen beschikbaar in de traject- en overzichtspagina&apos;s.</p>
+      </section>
 
-      {parsed.length > 0 && (
-        <a
-          href="/trajects"
-          className="mt-10 block w-full text-center py-3 rounded bg-green-600 text-white"
+      <section className="pt-2">
+        <div
+          className={`rounded-[1.75rem] border-2 border-dashed p-12 text-center transition ${
+            dragOver ? "border-blue-400 bg-blue-50/80" : "border-slate-300 bg-white/60"
+          }`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(false);
+            const file = e.dataTransfer.files[0];
+            if (file) handleFile(file);
+          }}
         >
-          Bekijk Trajecten
-        </a>
-      )}
+          <p className="text-lg font-semibold text-slate-900">Sleep hier je CSV</p>
+          <p className="mt-2 text-sm text-slate-500">Papaparse leest het bestand in en groepeert de data per traject.</p>
+        </div>
+
+        {parsed.length > 0 && (
+          <a
+            href="/trajects"
+            className="mt-8 inline-block rounded-full border border-[#4db84a] bg-[linear-gradient(135deg,#7dd87a_0%,#58c754_100%)] px-6 py-3 text-sm font-semibold text-[#103410] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          >
+            Bekijk Trajecten
+          </a>
+        )}
+      </section>
     </div>
   );
 }

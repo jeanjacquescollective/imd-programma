@@ -67,8 +67,8 @@ export function CourseGrid({ courses, layout }: Props) {
   }));
 
   return (
-    <div className="mx-auto grid max-w-8xl min-h-[70vh] grid-rows-[auto_minmax(0,1fr)] pt-5 lg:h-[calc(100vh-3rem)] lg:min-h-0 lg:overflow-hidden lg:pt-0">
-      <div className="min-h-0 overflow-x-auto overflow-y-auto pb-2 lg:overflow-y-visible overflow-x-hidden">
+    <div className="mx-auto grid max-w-8xl min-h-[70vh] grid-rows-[auto_minmax(0,1fr)] pt-5 lg:h-[calc(100vh-3rem)] lg:min-h-0 lg:overflow-visible lg:pt-0">
+      <div className="min-h-0 overflow-x-auto overflow-y-visible pb-2 lg:overflow-visible">
         <div
           className="relative grid min-h-full gap-y-1 overflow-visible lg:h-full"
           style={{

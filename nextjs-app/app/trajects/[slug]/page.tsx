@@ -44,15 +44,20 @@ export default function TrajectPage() {
         setLoading(false);
     }, [slug]);
 
-    if (loading || !layout) return <div>Loading...</div>;
+    if (loading || !layout) return <div className="imd-page"><div className="imd-soft-card p-8 text-center text-slate-500">Loading...</div></div>;
 
     if (courses.length === 0) {
-        return <div>No courses found for this trajectory.</div>;
+        return <div className="imd-page"><div className="imd-soft-card p-8 text-center text-slate-500">No courses found for this trajectory.</div></div>;
     }
 
     return (
-        <div className="p-6">
-            <h1 className="text-3xl font-bold mb-6">{trajectName} - {trajectYear} </h1>
+        <div className="imd-page">
+            <section className="imd-hero mb-8">
+                <h1 className="text-4xl font-bold tracking-[-0.03em] text-slate-900">{trajectName}</h1>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  {trajectYear ? `Academiejaar ${trajectYear}` : "Opgeslagen curriculumweergave"}
+                </p>
+            </section>
             <CourseGrid courses={courses} layout={layout} />
         </div>
     );

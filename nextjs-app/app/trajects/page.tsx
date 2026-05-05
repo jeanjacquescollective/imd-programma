@@ -18,23 +18,27 @@ export default function TrajectPage() {
         setLoading(false);
     }, []);
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <div className="imd-page"><div className="imd-soft-card p-8 text-center text-slate-500">Loading...</div></div>;
 
     if (trajects.length === 0) {
-        return <div>No trajects found.</div>;
+        return <div className="imd-page"><div className="imd-soft-card p-8 text-center text-slate-500">No trajects found.</div></div>;
     }
 
     return (
-        <div className="p-6">
-            <h1 className="text-3xl font-bold mb-6">Trajects</h1>
-            <div className="space-y-4">
+        <div className="imd-page">
+            <section className="imd-hero mb-8">
+                <h1 className="text-4xl font-bold tracking-[-0.03em] text-slate-900">Kies een traject</h1>
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">Open een opgeslagen traject en bekijk meteen het volledige semesterrooster in de curriculumgrid.</p>
+            </section>
+            <div className="divide-y divide-slate-200 rounded-2xl border border-slate-200/80 bg-white/55">
                 {trajects.map((traject) => (
                     <Link
                         key={traject}
                         href={`/trajects/${encodeURIComponent(traject)}`}
-                        className="block p-4 border rounded-lg hover:shadow-lg transition-shadow"
+                        className="flex items-center justify-between px-5 py-4 transition hover:bg-white/70"
                     >
-                        <h2 className="text-xl font-semibold text-blue-600">{traject}</h2>
+                        <h2 className="text-xl font-semibold text-slate-900">{traject}</h2>
+                        <p className="text-sm text-slate-500">Open</p>
                     </Link>
                 ))}
             </div>

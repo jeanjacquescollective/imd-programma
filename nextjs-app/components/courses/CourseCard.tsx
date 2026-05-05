@@ -77,6 +77,7 @@ export function CourseCard({
   const palette = PALETTE_STYLES[course.category] ?? PALETTE_STYLES.default;
   const accentColor =
     course.study_programs.length > 1 ? "rgba(255, 255, 255, 0.8)" : "rgba(20, 32, 51, 0.22)";
+  const showTooltipBelow = rowStart <= 3;
 
   return (
    <Link
@@ -96,7 +97,9 @@ export function CourseCard({
 
   {course.content && (
     <div
-      className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-80 -translate-x-1/2 rounded-xl bg-gray-800 p-3 text-xs text-white opacity-0 transition-opacity duration-300 delay-300 group-hover/card:opacity-100"
+      className={`pointer-events-none absolute left-1/2 z-50 w-80 -translate-x-1/2 rounded-xl bg-gray-800 p-3 text-xs text-white opacity-0 transition-opacity duration-300 delay-300 group-hover/card:opacity-100 ${
+        showTooltipBelow ? "top-full mt-2" : "bottom-full mb-2"
+      }`}
     >
       <div
         className="leading-5 text-white/90"
