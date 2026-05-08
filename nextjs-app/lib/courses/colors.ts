@@ -90,6 +90,6 @@ export function assignColors(
       category: palette.name,
     };
   });
-
+ 
   return colorMap;
 }
