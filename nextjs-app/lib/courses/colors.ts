@@ -36,11 +36,11 @@ const PALETTES = [
   },
 ] as const;
 
-const NONSPECIFIC_BLUE_SHADES = [
-  { category: "nonspecific-blue-1", color: "#dbeafe" },
-  { category: "nonspecific-blue-2", color: "#bfdbfe" },
-  { category: "nonspecific-blue-3", color: "#93c5fd" },
-  { category: "nonspecific-blue-4", color: "#60a5fa" },
+const NONSPECIFIC_ORANGE_SHADES = [
+  { category: "nonspecific-orange-1", color: "#ffedd5" },
+  { category: "nonspecific-orange-2", color: "#fed7aa" },
+  { category: "nonspecific-orange-3", color: "#fdba74" },
+  { category: "nonspecific-orange-4", color: "#fb923c" },
 ] as const;
 
 export function assignColors(
@@ -51,8 +51,10 @@ export function assignColors(
   const paletteByFamily = Object.fromEntries(
     families.map((family, index) => [family, PALETTES[index % PALETTES.length]])
   );
+  const nonSpecificToneByFamily = Object.fromEntries(
+    families.map((family, index) => [family, NONSPECIFIC_ORANGE_SHADES[index % NONSPECIFIC_ORANGE_SHADES.length]])
+  ) as Record<string, (typeof NONSPECIFIC_ORANGE_SHADES)[number]>;
   const shadeIdx: Record<string, number> = {};
-  const nonSpecificShadeIdx: Record<string, number> = {};
   const colorMap: Record<string, { color: string; category: string }> = {};
 
   courses.forEach((course) => {
@@ -68,12 +70,10 @@ export function assignColors(
       return;
     }
 
-    // Non-specific courses use blue shades only (same rule as layout: length !== 1).
+    // Non-specific courses use one fixed orange shade per family.
     if ((course.study_programs?.length ?? 0) !== 1) {
       const fam = getFamily(course.course_name);
-      const idx = (nonSpecificShadeIdx[fam] ?? 0) % NONSPECIFIC_BLUE_SHADES.length;
-      nonSpecificShadeIdx[fam] = (nonSpecificShadeIdx[fam] ?? 0) + 1;
-      const tone = NONSPECIFIC_BLUE_SHADES[idx];
+      const tone = nonSpecificToneByFamily[fam] ?? NONSPECIFIC_ORANGE_SHADES[0];
       colorMap[course.course_name] = {
         color: tone.color,
         category: tone.category,
