@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "json5": "^2.2.3",
-    "next": "^16.2.1",
+    "next": "^16.2.6",
     "papaparse": "^5.5.3",
     "react": "18.2.0",
     "react-dom": "18.2.0"

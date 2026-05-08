@@ -1,0 +1,1 @@
+export const diff = (orig,edited)=>{let o={};for(let k in edited){if(orig[k]!==edited[k])o[k]={old:orig[k],new:edited[k]};}return o;};

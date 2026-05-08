@@ -1,0 +1,1 @@
+export const exportJson=(data)=>JSON.stringify(data,null,2);

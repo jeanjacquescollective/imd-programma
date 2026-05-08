@@ -1,4 +1,4 @@
-import type { StructuredCourses, LayoutResult, Placement } from "@/types/course";
+import type { StructuredCourses, LayoutResult, Placement, PlacedCourse } from "@/types/course";
 
 export const ROWS_PER_SEMESTER = 30;
 export const SEM_KEYS = ["Semester 1", "Semester 2"] as const;
@@ -215,9 +215,8 @@ function getTotalRows(columns: Record<string, { study_load: number }[]>): number
 export function buildLayout(courses: StructuredCourses): LayoutResult {
   const columns = toSemesterColumns(courses);
   const sortedColumnKeys = getSortedColumnKeys(columns);
-  const totalRows = getTotalRows(columns);
 
-  const placement: Placement = {};
+  // Identify large families (>FAMILY_SIZE_THRESHOLD distinct course names across all columns)
   const familyCourseCounts = buildFamilyCourseCounts(columns);
   const largeFamilies = new Set(
     Object.entries(familyCourseCounts)
@@ -225,29 +224,57 @@ export function buildLayout(courses: StructuredCourses): LayoutResult {
       .map(([fam]) => fam)
   );
 
+  // Global min study_load per family — used as sort key so ordering is consistent across columns
+  const familyMinLoad: Record<string, number> = {};
   sortedColumnKeys.forEach((colKey) => {
-    columns[colKey] = prepareColumn(columns[colKey] ?? [], largeFamilies);
+    (columns[colKey] ?? []).forEach((course) => {
+      const fam = getFamily(course.course_name);
+      if (familyMinLoad[fam] === undefined || course.study_load < familyMinLoad[fam]) {
+        familyMinLoad[fam] = course.study_load;
+      }
+    });
   });
 
-  // Find reference column for family offsets
-  let referenceList: { course_name: string; study_load: number }[] = [];
-  for (const colKey of sortedColumnKeys) {
-    if ((columns[colKey] ?? []).length) {
-      referenceList = columns[colKey];
-      break;
-    }
-  }
+  // Large families come before small families; within each group sort by min-load then name
+  const compareFamilies = (a: string, b: string): number => {
+    const aLarge = largeFamilies.has(a);
+    const bLarge = largeFamilies.has(b);
+    if (aLarge !== bLarge) return aLarge ? -1 : 1;
+    const diff = (familyMinLoad[a] ?? 0) - (familyMinLoad[b] ?? 0);
+    return diff !== 0 ? diff : a.localeCompare(b);
+  };
 
-  const familyOffsets = buildFamilyOffsets(referenceList);
+  const compareCourses = (
+    a: { course_name: string; study_load: number },
+    b: { course_name: string; study_load: number }
+  ): number => {
+    const famCmp = compareFamilies(getFamily(a.course_name), getFamily(b.course_name));
+    if (famCmp !== 0) return famCmp;
+    return a.study_load - b.study_load;
+  };
+
+  let totalRows = 1;
+  const placement: Placement = {};
 
   sortedColumnKeys.forEach((colKey) => {
     const list = columns[colKey] ?? [];
-    const orderedCourses = [
-      ...list.filter((course) => largeFamilies.has(getFamily(course.course_name))),
-      ...list.filter((course) => !largeFamilies.has(getFamily(course.course_name))),
-    ];
 
-    placement[colKey] = stackCourses(orderedCourses, totalRows);
+    // Non-specific courses on top, specific courses on the bottom
+    // Both groups sorted consistently so families land at similar rows across columns
+    const nonSpecific = list.filter((c) => !isSpecific(c)).sort(compareCourses);
+    const specific    = list.filter((c) =>  isSpecific(c)).sort(compareCourses);
+
+    const placed: PlacedCourse[] = [];
+    let row = 1;
+
+    [...nonSpecific, ...specific].forEach((course) => {
+      const rowSpan = Math.max(1, course.study_load);
+      placed.push({ course, rowStart: row, rowSpan });
+      row += rowSpan;
+    });
+
+    totalRows = Math.max(totalRows, row - 1);
+    placement[colKey] = placed;
   });
 
   return { placement, totalRows };
