@@ -53,6 +53,42 @@ const PALETTE_STYLES: Record<
     text: "#042422",
     credit: "#2f5f5b",
   },
+  "nonspecific-shared": {
+    background: "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)",
+    border: "#93c5fd",
+    text: "#1e3a8a",
+    credit: "#1d4ed8",
+  },
+  "nonspecific-blue-1": {
+    background: "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)",
+    border: "#93c5fd",
+    text: "#1e3a8a",
+    credit: "#1d4ed8",
+  },
+  "nonspecific-blue-2": {
+    background: "linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%)",
+    border: "#60a5fa",
+    text: "#1e3a8a",
+    credit: "#1d4ed8",
+  },
+  "nonspecific-blue-3": {
+    background: "linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%)",
+    border: "#3b82f6",
+    text: "#0f2d78",
+    credit: "#1e40af",
+  },
+  "nonspecific-blue-4": {
+    background: "linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)",
+    border: "#2563eb",
+    text: "#ffffff",
+    credit: "rgba(255, 255, 255, 0.86)",
+  },
+  "light-grey": {
+    background: "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)",
+    border: "#d1d5db",
+    text: "#374151",
+    credit: "#6b7280",
+  },
   default: {
     background: "linear-gradient(135deg, #ffffff 0%, #e8eef6 100%)",
     border: "#cbd5e1",
@@ -88,7 +124,7 @@ export function CourseCard({
     gridRow: `${rowStart + rowOffset} / span ${rowSpan}`,
     background: palette.background,
     border: `1px solid ${palette.border}`,
-    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.35), inset 4px 0 0 ${accentColor}`,
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.35)",
     color: palette.text,
   }}
 >

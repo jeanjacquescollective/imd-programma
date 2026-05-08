@@ -36,6 +36,13 @@ const PALETTES = [
   },
 ] as const;
 
+const NONSPECIFIC_BLUE_SHADES = [
+  { category: "nonspecific-blue-1", color: "#dbeafe" },
+  { category: "nonspecific-blue-2", color: "#bfdbfe" },
+  { category: "nonspecific-blue-3", color: "#93c5fd" },
+  { category: "nonspecific-blue-4", color: "#60a5fa" },
+] as const;
+
 export function assignColors(
   courses: StructuredCourses
 ): Record<string, { color: string; category: string }> {
@@ -45,10 +52,35 @@ export function assignColors(
     families.map((family, index) => [family, PALETTES[index % PALETTES.length]])
   );
   const shadeIdx: Record<string, number> = {};
+  const nonSpecificShadeIdx: Record<string, number> = {};
   const colorMap: Record<string, { color: string; category: string }> = {};
 
   courses.forEach((course) => {
     if (colorMap[course.course_name]) return;
+
+    const loweredName = course.course_name.toLowerCase();
+    // Keep electives and "with" variants visually neutral.
+    if (loweredName.includes("keuzevak") || loweredName.includes("with")) {
+      colorMap[course.course_name] = {
+        color: "#e5e7eb",
+        category: "light-grey",
+      };
+      return;
+    }
+
+    // Non-specific courses use blue shades only (same rule as layout: length !== 1).
+    if ((course.study_programs?.length ?? 0) !== 1) {
+      const fam = getFamily(course.course_name);
+      const idx = (nonSpecificShadeIdx[fam] ?? 0) % NONSPECIFIC_BLUE_SHADES.length;
+      nonSpecificShadeIdx[fam] = (nonSpecificShadeIdx[fam] ?? 0) + 1;
+      const tone = NONSPECIFIC_BLUE_SHADES[idx];
+      colorMap[course.course_name] = {
+        color: tone.color,
+        category: tone.category,
+      };
+      return;
+    }
+
     const fam = getFamily(course.course_name);
     const palette = paletteByFamily[fam] ?? PALETTES[0];
     const idx = (shadeIdx[fam] ?? 0) % palette.shades.length;
