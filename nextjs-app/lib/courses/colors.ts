@@ -1,40 +1,29 @@
 import type { StructuredCourses } from "@/types/course";
 import { getFamily } from "./layout";
 
-const PALETTES = [
-  {
-    name: "green",
-    shades: ["#c8f5c4", "#a5e8a0", "#7dd87a"],
-  },
-  {
-    name: "green-dark",
-    shades: ["#a5e8a0", "#7dd87a", "#58c754"],
-  },
+const SPECIFIC_BASE_PALETTES = [
   {
     name: "blue",
-    shades: ["#b3d9ff", "#85bef5", "#5b9bd5"],
+    shades: ["#dbeafe", "#bfdbfe", "#93c5fd"],
   },
   {
     name: "blue-dark",
-    shades: ["#8cc0ee", "#5b9bd5", "#3d7fc0"],
+    shades: ["#93c5fd", "#60a5fa", "#3b82f6"],
   },
+] as const;
+
+const SPECIFIC_TECH_PALETTES = [
   {
     name: "purple",
-    shades: ["#e0b8f0", "#ce93d8", "#ba68c8"],
+    shades: ["#e9d5ff", "#d8b4fe", "#c084fc"],
   },
   {
     name: "purple-dark",
-    shades: ["#d3a8e3", "#ba68c8", "#9c45b8"],
-  },
-  {
-    name: "teal",
-    shades: ["#c8f0ec", "#9dddd6", "#80cbc4"],
-  },
-  {
-    name: "teal-dark",
-    shades: ["#aee0db", "#80cbc4", "#55b5ac"],
+    shades: ["#c084fc", "#a855f7", "#9333ea"],
   },
 ] as const;
+
+const TECH_FAMILY_PATTERN = /\b(code|coding|program|programming|web|dev|development|data|ai|ml|ux|ui|design|system|software|engineer|technical|tech|motion|3d|game|app|script)\b/i;
 
 const NONSPECIFIC_ORANGE_SHADES = [
   { category: "nonspecific-orange-1", color: "#ffedd5" },
@@ -48,9 +37,16 @@ export function assignColors(
 ): Record<string, { color: string; category: string }> {
   const allFamilies = courses.map((course) => getFamily(course.course_name));
   const families = Array.from(new Set(allFamilies));
-  const paletteByFamily = Object.fromEntries(
-    families.map((family, index) => [family, PALETTES[index % PALETTES.length]])
-  );
+  const technicalFamilies = families.filter((family) => TECH_FAMILY_PATTERN.test(family));
+  const regularFamilies = families.filter((family) => !TECH_FAMILY_PATTERN.test(family));
+
+  const paletteByFamily: Record<string, { name: string; shades: readonly string[] }> = {};
+  regularFamilies.forEach((family, index) => {
+    paletteByFamily[family] = SPECIFIC_BASE_PALETTES[index % SPECIFIC_BASE_PALETTES.length];
+  });
+  technicalFamilies.forEach((family, index) => {
+    paletteByFamily[family] = SPECIFIC_TECH_PALETTES[index % SPECIFIC_TECH_PALETTES.length];
+  });
   const nonSpecificToneByFamily = Object.fromEntries(
     families.map((family, index) => [family, NONSPECIFIC_ORANGE_SHADES[index % NONSPECIFIC_ORANGE_SHADES.length]])
   ) as Record<string, (typeof NONSPECIFIC_ORANGE_SHADES)[number]>;
@@ -82,7 +78,7 @@ export function assignColors(
     }
 
     const fam = getFamily(course.course_name);
-    const palette = paletteByFamily[fam] ?? PALETTES[0];
+    const palette = paletteByFamily[fam] ?? SPECIFIC_BASE_PALETTES[0];
     const idx = (shadeIdx[fam] ?? 0) % palette.shades.length;
     shadeIdx[fam] = (shadeIdx[fam] ?? 0) + 1;
     colorMap[course.course_name] = {
