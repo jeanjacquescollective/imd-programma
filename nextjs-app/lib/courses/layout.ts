@@ -208,14 +208,14 @@ export function buildLayout(courses: StructuredCourses): LayoutResult {
     placement[colKey] = [...nonSpecificPlaced[colKey], ...specificPlaced[colKey]];
   });
 
-  // Overflow rule: a semester's total load can occasionally spike well past a
-  // normal one (bad source data, a one-off heavy semester). If that happens
-  // and another semester has trailing empty space — it's simply shorter,
-  // since every column shares one row count — move one of the overloaded
-  // semester's non-recurring courses to render inside that empty space
-  // instead of stretching the whole grid taller for everyone. The course
-  // still belongs to its real semester; only where its card is drawn moves.
-  const OVERFLOW_THRESHOLD = 60;
+  // Overflow rule: a normal semester is 30 SP. If one runs over that (bad
+  // source data, a one-off heavy semester) and another semester has trailing
+  // empty space — it's simply shorter, since every column shares one row
+  // count — move one of the overloaded semester's non-recurring courses to
+  // render inside that empty space instead of stretching the whole grid
+  // taller for everyone. The course still belongs to its real semester; only
+  // where its card is drawn moves.
+  const OVERFLOW_THRESHOLD = 30;
 
   const columnHeight = (colKey: string) =>
     placement[colKey].reduce((max, p) => Math.max(max, p.rowStart + p.rowSpan - 1), 0);
