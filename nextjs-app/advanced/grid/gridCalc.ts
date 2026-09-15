@@ -1,1 +1,0 @@
-export const calcHeight = sp=>sp*60;

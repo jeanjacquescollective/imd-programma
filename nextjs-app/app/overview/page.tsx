@@ -13,10 +13,12 @@ function TrajectGrid({ traject, rawCourses }: { traject: string; rawCourses: Raw
 
   return (
     <section className="mb-12">
-      <div className="mb-4">
-        <h2 className="text-2xl font-bold tracking-[-0.02em] text-slate-900">{traject}</h2>
+      <div className="imd-page pb-0 pt-0">
+        <h2 className="mb-2 text-2xl font-bold tracking-[-0.02em] text-slate-900">{traject}</h2>
       </div>
-      <CourseGrid courses={courses} layout={layout} />
+      <div className="imd-grid-wrap pb-0">
+        <CourseGrid courses={courses} layout={layout} />
+      </div>
     </section>
   );
 }
@@ -34,11 +36,13 @@ export default function CoursesPage() {
   }
 
   return (
-    <div className="imd-page">
-      <section className="imd-hero mb-8">
-        <h1 className="text-4xl font-bold tracking-[-0.03em] text-slate-900">Alle trajecten naast elkaar</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">Vergelijk opgeslagen trajecten in dezelfde curriculumopmaak zonder de context van een individueel detailscherm te verliezen.</p>
-      </section>
+    <div>
+      <div className="imd-page pb-0 pt-4">
+        <section className="imd-hero mb-3">
+          <h1 className="text-4xl font-bold tracking-[-0.03em] text-slate-900">Alle trajecten naast elkaar</h1>
+          <p className="mt-1 max-w-2xl text-sm leading-7 text-slate-600">Vergelijk opgeslagen trajecten in dezelfde curriculumopmaak zonder de context van een individueel detailscherm te verliezen.</p>
+        </section>
+      </div>
       {trajectEntries.map(([traject, rawCourses]) => (
         <TrajectGrid key={traject} traject={traject} rawCourses={rawCourses} />
       ))}

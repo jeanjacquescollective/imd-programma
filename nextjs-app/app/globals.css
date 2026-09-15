@@ -60,6 +60,10 @@
     @apply mx-auto max-w-6xl px-4 pb-10 pt-10 sm:px-6 lg:px-8;
   }
 
+  .imd-grid-wrap {
+    @apply w-full px-4 pb-10 sm:px-6 lg:px-8;
+  }
+
   .imd-hero {
     @apply mb-8 rounded-[2rem] ;  
   }

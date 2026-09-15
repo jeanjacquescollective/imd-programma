@@ -5,53 +5,45 @@ const PALETTE_STYLES: Record<
   string,
   { background: string; border: string; text: string; credit: string }
 > = {
-  green: {
-    background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
-    border: "#fcd34d",
-    text: "#78350f",
-    credit: "#92400e",
+  // Every specific (single-programme) course family gets the same hue (blue),
+  // just a different shade — so unrelated families stay distinguishable while
+  // reading as one consistent color, and same-family courses (e.g.
+  // "Interaction 1" / "Interaction 2") land on the exact same shade.
+  "specific-1": {
+    background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
+    border: "#bfdbfe",
+    text: "#1e3a8a",
+    credit: "#1d4ed8",
   },
-  "green-dark": {
-    background: "linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%)",
-    border: "#d97706",
-    text: "#4a2108",
-    credit: "#78350f",
-  },
-  blue: {
+  "specific-2": {
     background: "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)",
     border: "#93c5fd",
     text: "#1e3a8a",
     credit: "#1d4ed8",
   },
-  "blue-dark": {
-    background: "linear-gradient(135deg, #93c5fd 0%, #3b82f6 100%)",
+  "specific-3": {
+    background: "linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%)",
+    border: "#60a5fa",
+    text: "#1e3a8a",
+    credit: "#1d4ed8",
+  },
+  "specific-4": {
+    background: "linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%)",
+    border: "#3b82f6",
+    text: "#0f2557",
+    credit: "#17356e",
+  },
+  "specific-5": {
+    background: "linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)",
     border: "#2563eb",
     text: "#ffffff",
     credit: "rgba(255, 255, 255, 0.86)",
   },
-  purple: {
-    background: "linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%)",
-    border: "#c084fc",
-    text: "#4c1d95",
-    credit: "#6d28d9",
-  },
-  "purple-dark": {
-    background: "linear-gradient(135deg, #c084fc 0%, #9333ea 100%)",
-    border: "#7e22ce",
+  "specific-6": {
+    background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+    border: "#1e40af",
     text: "#ffffff",
     credit: "rgba(255, 255, 255, 0.86)",
-  },
-  teal: {
-    background: "linear-gradient(135deg, #ecfccb 0%, #d9f99d 100%)",
-    border: "#a3e635",
-    text: "#365314",
-    credit: "#4d7c0f",
-  },
-  "teal-dark": {
-    background: "linear-gradient(135deg, #bef264 0%, #84cc16 100%)",
-    border: "#65a30d",
-    text: "#1a2e05",
-    credit: "#365314",
   },
   "nonspecific-shared": {
     background: "linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%)",
@@ -114,6 +106,7 @@ export function CourseCard({
   const accentColor =
     course.study_programs.length > 1 ? "rgba(255, 255, 255, 0.8)" : "rgba(20, 32, 51, 0.22)";
   const showTooltipBelow = rowStart <= 3;
+  const isDark = palette.text === "#ffffff";
 
   return (
    <Link
@@ -128,8 +121,17 @@ export function CourseCard({
     color: palette.text,
   }}
 >
-  <h2 className="font-bold text-sm leading-tight">{course.course_name}</h2>
-  <p className="mt-0.5 text-xs font-medium" style={{ color: palette.credit }}>{course.study_load} SP</p>
+  <h2 className="pr-6 font-bold text-sm leading-tight">{course.course_name}</h2>
+
+  <div
+    className="pointer-events-none absolute bottom-1.5 right-1.5 z-30 flex h-6 w-6 items-center justify-center rounded-full text-[8px] font-bold leading-none opacity-30"
+    style={{
+      border: `1.5px solid ${isDark ? "rgba(255,255,255,0.55)" : palette.credit}`,
+      color: palette.credit,
+    }}
+  >
+    {course.study_load}st
+  </div>
 
   {course.content && (
     <div

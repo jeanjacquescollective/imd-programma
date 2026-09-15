@@ -41,3 +41,6 @@ build/
 .next/
 out/
 .vercel
+
+# Logs
+*.log

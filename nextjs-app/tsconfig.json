@@ -22,23 +22,22 @@
         "name": "next"
       }
     ],
-    "baseUrl": ".",
     "paths": {
-      "@/data/*": [
-        "data/*"
+      "@/*": [
+        "./*"
       ],
       "@/hooks/*": [
-        "hooks/*"
+        "./hooks/*"
       ],
       "@/types/*": [
-        "types/*"
+        "./types/*"
       ],
       "@/components/*": [
-        "components/*"
+        "./components/*"
       ],
       "@/lib/*": [
-        "lib/*"
-      ],
+        "./lib/*"
+      ]
     }
   },
   "include": [

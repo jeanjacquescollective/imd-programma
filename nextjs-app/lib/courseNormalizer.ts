@@ -1,1 +1,0 @@
-export const normalizeCourse = (row)=>({course_name:row[0],study_load:Number(row[1])});

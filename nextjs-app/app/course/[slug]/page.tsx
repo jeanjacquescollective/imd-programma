@@ -16,6 +16,7 @@ const EMPTY_COURSE: Course = {
   evaluation: [],
   study_load: 0,
   study_programs: [],
+  is_generic: false,
   content: "",
   color: "",
   academic_year: 0,

@@ -16,7 +16,12 @@ export function cleanTraject(traject: string): string {
     .join(" ");
 }
 
-export function buildStructuredCourses(data: RawCourse[]): StructuredCourses {
+const GENERIC_NAME_PATTERN = /keuzevak/i;
+
+export function buildStructuredCourses(
+  data: RawCourse[],
+  genericNames: Set<string> = new Set()
+): StructuredCourses {
   const structuredCourses: StructuredCourses = [];
 
   data.forEach((course) => {
@@ -30,6 +35,7 @@ export function buildStructuredCourses(data: RawCourse[]): StructuredCourses {
       course_name: course.course_name,
       study_load: parseInt(String(course.study_load)),
       study_programs: Array.isArray(course.study_programs) ? course.study_programs : [],
+      is_generic: genericNames.has(course.course_name) || GENERIC_NAME_PATTERN.test(course.course_name),
       content: course.content || "",
       color: "",
       category: "",
@@ -57,7 +63,7 @@ export function attachColors(structured: StructuredCourses): StructuredCourses {
   return structured;
 }
 
-export function prepareCourses(raw: RawCourse[]): StructuredCourses {
-  const structured = buildStructuredCourses(raw);
+export function prepareCourses(raw: RawCourse[], genericNames?: Set<string>): StructuredCourses {
+  const structured = buildStructuredCourses(raw, genericNames);
   return attachColors(structured);
 }

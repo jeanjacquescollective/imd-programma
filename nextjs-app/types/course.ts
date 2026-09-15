@@ -35,6 +35,7 @@ export interface Course {
   course_name: string;
   study_load: number;
   study_programs: string[];
+  is_generic: boolean;
   content: string;
   color: string;
   category: string;

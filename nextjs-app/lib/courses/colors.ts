@@ -1,91 +1,81 @@
 import type { StructuredCourses } from "@/types/course";
 import { getFamily } from "./layout";
 
-const SPECIFIC_BASE_PALETTES = [
-  {
-    name: "blue",
-    shades: ["#dbeafe", "#bfdbfe", "#93c5fd"],
-  },
-  {
-    name: "blue-dark",
-    shades: ["#93c5fd", "#60a5fa", "#3b82f6"],
-  },
+// One category per family keeps every similarly-named course (same family, e.g.
+// "Interaction 1" / "Interaction 2") on the exact same shade. All specific
+// (single-programme) families share one hue and only vary by shade; generic
+// (multi-programme) families get their own hue, also varied by shade.
+const SPECIFIC_CATEGORIES = [
+  "specific-1",
+  "specific-2",
+  "specific-3",
+  "specific-4",
+  "specific-5",
+  "specific-6",
+] as const;
+const NONSPECIFIC_CATEGORIES = [
+  "nonspecific-orange-1",
+  "nonspecific-orange-2",
+  "nonspecific-orange-3",
+  "nonspecific-orange-4",
 ] as const;
 
-const SPECIFIC_TECH_PALETTES = [
-  {
-    name: "purple",
-    shades: ["#e9d5ff", "#d8b4fe", "#c084fc"],
-  },
-  {
-    name: "purple-dark",
-    shades: ["#c084fc", "#a855f7", "#9333ea"],
-  },
-] as const;
-
-const TECH_FAMILY_PATTERN = /\b(code|coding|program|programming|web|dev|development|data|ai|ml|ux|ui|design|system|software|engineer|technical|tech|motion|3d|game|app|script)\b/i;
-
-const NONSPECIFIC_ORANGE_SHADES = [
-  { category: "nonspecific-orange-1", color: "#ffedd5" },
-  { category: "nonspecific-orange-2", color: "#fed7aa" },
-  { category: "nonspecific-orange-3", color: "#fdba74" },
-  { category: "nonspecific-orange-4", color: "#fb923c" },
-] as const;
+const CATEGORY_SWATCH: Record<string, string> = {
+  "specific-1": "#dbeafe",
+  "specific-2": "#bfdbfe",
+  "specific-3": "#93c5fd",
+  "specific-4": "#60a5fa",
+  "specific-5": "#3b82f6",
+  "specific-6": "#1d4ed8",
+  "nonspecific-orange-1": "#fed7aa",
+  "nonspecific-orange-2": "#fdba74",
+  "nonspecific-orange-3": "#fb923c",
+  "nonspecific-orange-4": "#f97316",
+};
 
 export function assignColors(
   courses: StructuredCourses
 ): Record<string, { color: string; category: string }> {
   const allFamilies = courses.map((course) => getFamily(course.course_name));
   const families = Array.from(new Set(allFamilies));
-  const technicalFamilies = families.filter((family) => TECH_FAMILY_PATTERN.test(family));
-  const regularFamilies = families.filter((family) => !TECH_FAMILY_PATTERN.test(family));
 
-  const paletteByFamily: Record<string, { name: string; shades: readonly string[] }> = {};
-  regularFamilies.forEach((family, index) => {
-    paletteByFamily[family] = SPECIFIC_BASE_PALETTES[index % SPECIFIC_BASE_PALETTES.length];
-  });
-  technicalFamilies.forEach((family, index) => {
-    paletteByFamily[family] = SPECIFIC_TECH_PALETTES[index % SPECIFIC_TECH_PALETTES.length];
-  });
-  const nonSpecificToneByFamily = Object.fromEntries(
-    families.map((family, index) => [family, NONSPECIFIC_ORANGE_SHADES[index % NONSPECIFIC_ORANGE_SHADES.length]])
-  ) as Record<string, (typeof NONSPECIFIC_ORANGE_SHADES)[number]>;
-  const shadeIdx: Record<string, number> = {};
+  // Every course in a family shares one category, so similarly-named courses
+  // (e.g. "Interaction 1" / "Interaction 2") always render the same shade.
+  const specificCategoryByFamily = Object.fromEntries(
+    families.map((family, index) => [family, SPECIFIC_CATEGORIES[index % SPECIFIC_CATEGORIES.length]])
+  ) as Record<string, (typeof SPECIFIC_CATEGORIES)[number]>;
+
+  // Generic (multi-programme) families get a different shade per family so they
+  // stay distinguishable from each other, while still sharing the orange hue.
+  const genericCategoryByFamily = Object.fromEntries(
+    families.map((family, index) => [family, NONSPECIFIC_CATEGORIES[index % NONSPECIFIC_CATEGORIES.length]])
+  ) as Record<string, (typeof NONSPECIFIC_CATEGORIES)[number]>;
+
   const colorMap: Record<string, { color: string; category: string }> = {};
 
   courses.forEach((course) => {
     if (colorMap[course.course_name]) return;
 
-    const loweredName = course.course_name.toLowerCase();
-    // Keep electives and "with" variants visually neutral.
-    if (loweredName.includes("keuzevak") || loweredName.includes("with")) {
-      colorMap[course.course_name] = {
-        color: "#e5e7eb",
-        category: "light-grey",
-      };
-      return;
-    }
-
-    // Non-specific courses use one fixed orange shade per family.
-    if ((course.study_programs?.length ?? 0) !== 1) {
-      const fam = getFamily(course.course_name);
-      const tone = nonSpecificToneByFamily[fam] ?? NONSPECIFIC_ORANGE_SHADES[0];
-      colorMap[course.course_name] = {
-        color: tone.color,
-        category: tone.category,
-      };
-      return;
-    }
-
     const fam = getFamily(course.course_name);
-    const palette = paletteByFamily[fam] ?? SPECIFIC_BASE_PALETTES[0];
-    const idx = (shadeIdx[fam] ?? 0) % palette.shades.length;
-    shadeIdx[fam] = (shadeIdx[fam] ?? 0) + 1;
+
+    // Non-specific (generic) courses use one fixed shade per family, from the orange family.
+    // Keuzevakken (electives) are generic by nature (course.is_generic covers them
+    // via the name-based check in buildStructuredCourses).
+    if (course.is_generic) {
+      const category = genericCategoryByFamily[fam] ?? NONSPECIFIC_CATEGORIES[0];
+      colorMap[course.course_name] = {
+        color: CATEGORY_SWATCH[category],
+        category,
+      };
+      return;
+    }
+
+    const category = specificCategoryByFamily[fam] ?? SPECIFIC_CATEGORIES[0];
     colorMap[course.course_name] = {
-      color: palette.shades[idx],
-      category: palette.name,
+      color: CATEGORY_SWATCH[category],
+      category,
     };
   });
- 
+
   return colorMap;
 }

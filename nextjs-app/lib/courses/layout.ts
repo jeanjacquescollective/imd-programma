@@ -3,16 +3,25 @@ import type { StructuredCourses, LayoutResult, Placement, PlacedCourse } from "@
 export const ROWS_PER_SEMESTER = 30;
 export const SEM_KEYS = ["Semester 1", "Semester 2"] as const;
 const FAMILY_SIZE_THRESHOLD = 2;
+// Safety cap for the earliest-fit search below — comfortably larger than any
+// real curriculum's row count.
+const SEARCH_BOUND = 100000;
 
 export function getFamily(name: string): string {
   return name
     .toLowerCase()
     .replace(/\s*(solo|imd)\s*/gi, " ")
+    // Strip a trailing "<number>: <descriptor>" suffix (e.g. "3: Virtual Worlds",
+    // possibly multiple words) before the plain trailing-number strip, so
+    // "Development 3: Virtual Worlds"/"Development 4: Creative Development" land
+    // in the same family as "Development 1"/"Development 2".
+    .replace(/\s+\d+\s*:\s*.+$/, "")
     .replace(/\s+\d+\s*$/, "")
     .trim();
 }
 
-function isSpecific(course: { study_programs?: string[] }): boolean {
+function isSpecific(course: { is_generic?: boolean; study_programs?: string[] }): boolean {
+  if (course.is_generic !== undefined) return !course.is_generic;
   return (course.study_programs?.length ?? 0) === 1;
 }
 
@@ -24,155 +33,6 @@ function hasOverlap(
   return placed.some(
     (p) => rowStart < p.rowStart + p.rowSpan && rowStart + rowSpan > p.rowStart
   );
-}
-
-function findFreeSlot(
-  placed: { rowStart: number; rowSpan: number }[],
-  fromRow: number,
-  span: number,
-  totalRows: number
-): number {
-  const normalizedSpan = Math.max(1, Math.min(span, totalRows));
-  const maxStart = totalRows - normalizedSpan + 1;
-  const start = Math.min(Math.max(1, fromRow), maxStart);
-
-  for (let row = start; row <= maxStart; row++) {
-    if (!hasOverlap(placed, row, normalizedSpan)) return row;
-  }
-  return start;
-}
-
-function buildFamilyCourseCounts(
-  columns: Record<string, { course_name: string }[]>
-): Record<string, number> {
-  const seen: Record<string, Set<string>> = {};
-  Object.values(columns).forEach((courses) => {
-    courses.forEach((course) => {
-      const fam = getFamily(course.course_name);
-      if (!seen[fam]) seen[fam] = new Set();
-      seen[fam].add(course.course_name);
-    });
-  });
-
-  return Object.fromEntries(
-    Object.entries(seen).map(([fam, names]) => [fam, names.size])
-  );
-}
-
-function sortCourses<T extends { course_name: string; study_load: number; study_programs?: string[] }>(
-  courses: T[],
-  largeFamilies: Set<string>
-): T[] {
-  return [...courses].sort((a, b) => {
-    const aLarge = largeFamilies.has(getFamily(a.course_name));
-    const bLarge = largeFamilies.has(getFamily(b.course_name));
-    if (aLarge && !bLarge) return 1;
-    if (!aLarge && bLarge) return -1;
-    const familyCompare = getFamily(a.course_name).localeCompare(getFamily(b.course_name));
-    if (familyCompare !== 0) return familyCompare;
-    return a.study_load - b.study_load;
-  });
-}
-
-function prepareColumn<T extends { course_name: string; study_load: number; study_programs?: string[] }>(
-  courses: T[],
-  largeFamilies: Set<string>
-): T[] {
-  const shared   = sortCourses(courses.filter((c) => !isSpecific(c)), largeFamilies);
-  const specific = sortCourses(courses.filter((c) =>  isSpecific(c)), largeFamilies);
-  return [...shared, ...specific];
-}
-
-function buildFamilyOffsets(
-  referenceList: { course_name: string; study_load: number }[]
-): Record<string, number> {
-  const offsets: Record<string, number> = {};
-  let cursor = 1;
-  referenceList.forEach((course) => {
-    const fam = getFamily(course.course_name);
-    if (offsets[fam] === undefined) offsets[fam] = cursor;
-    cursor += course.study_load;
-  });
-  return offsets;
-}
-
-function placeCourses(
-  list: { course_name: string; study_load: number; study_programs?: string[]; [key: string]: any }[],
-  placed: { course: any; rowStart: number; rowSpan: number }[],
-  familyOffsets: Record<string, number>,
-  largeFamilies: Set<string>,
-  onlyLarge: boolean,
-  totalRows: number  // true = first pass (large families), false = second pass (small families)
-) {
-  const familyCursor: Record<string, number> = {};
-
-  list.forEach((course) => {
-    const span = Math.max(1, Math.min(course.study_load, totalRows));
-    const maxStart = totalRows - span + 1;
-
-    const fam = getFamily(course.course_name);
-    const isLarge = largeFamilies.has(fam);
-
-    // Skip courses that don't belong to this pass
-    if (onlyLarge && !isLarge) return;
-    if (!onlyLarge && isLarge) return;
-
-    if (familyCursor[fam] === undefined) {
-      const desired = familyOffsets[fam] ?? 1;
-      // Large families always claim their desired slot (they have upper hand)
-      // Small families find the first free slot from row 1
-      familyCursor[fam] = isLarge
-        ? findFreeSlot(placed, Math.min(Math.max(1, desired), maxStart), span, totalRows)
-        : findFreeSlot(placed, 1, span, totalRows);
-    } else {
-      // Stack within the same family — skip over anything in the way
-      const desired = familyCursor[fam];
-      familyCursor[fam] = hasOverlap(placed, desired, span)
-        ? findFreeSlot(placed, desired, span, totalRows)
-        : desired;
-    }
-
-    const rowStart = familyCursor[fam];
-    const rowSpan = span;
-
-    placed.push({ course, rowStart, rowSpan });
-    familyCursor[fam] += rowSpan;
-  });
-}
-
-function compactPlacement<T extends { rowStart: number; rowSpan: number }>(placed: T[]): T[] {
-  let nextRow = 1;
-
-  return [...placed]
-    .sort((a, b) => a.rowStart - b.rowStart)
-    .map((entry) => {
-      const compacted = {
-        ...entry,
-        rowStart: nextRow,
-      };
-
-      nextRow += entry.rowSpan;
-      return compacted;
-    });
-}
-
-function stackCourses(
-  list: { course: any; study_load: number }[] | { study_load: number; [key: string]: any }[],
-  totalRows: number
-): { course: any; rowStart: number; rowSpan: number }[] {
-  let nextRow = 1;
-
-  return list.map((course: any) => {
-    const rowSpan = Math.max(1, Math.min(course.study_load, totalRows));
-    const placedCourse = {
-      course,
-      rowStart: nextRow,
-      rowSpan,
-    };
-
-    nextRow += rowSpan;
-    return placedCourse;
-  });
 }
 
 function toSemesterColumns(courses: StructuredCourses): Record<string, any[]> {
@@ -203,28 +63,28 @@ function getSortedColumnKeys(columns: Record<string, any[]>): string[] {
   });
 }
 
-function getTotalRows(columns: Record<string, { study_load: number }[]>): number {
-  const maxStudyLoad = Object.values(columns).reduce((maxValue, courses) => {
-    const totalStudyLoad = courses.reduce((sum, course) => sum + course.study_load, 0);
-    return Math.max(maxValue, totalStudyLoad);
-  }, 0);
-
-  return Math.max(maxStudyLoad, 1);
-}
-
 export function buildLayout(courses: StructuredCourses): LayoutResult {
   const columns = toSemesterColumns(courses);
   const sortedColumnKeys = getSortedColumnKeys(columns);
 
-  // Identify large families (>FAMILY_SIZE_THRESHOLD distinct course names across all columns)
-  const familyCourseCounts = buildFamilyCourseCounts(columns);
+  // How many distinct columns (semesters) a family shows up in — used only to
+  // decide which families get priority (appear earlier) when several are
+  // competing for the same rows. A family that recurs across columns (e.g.
+  // "Development" in semesters 1-4) is a "track": every instance of it always
+  // gets the exact same row, computed once below.
+  const columnCountByFamily: Record<string, number> = {};
+  sortedColumnKeys.forEach((colKey) => {
+    const familiesInColumn = new Set((columns[colKey] ?? []).map((c) => getFamily(c.course_name)));
+    familiesInColumn.forEach((fam) => {
+      columnCountByFamily[fam] = (columnCountByFamily[fam] ?? 0) + 1;
+    });
+  });
   const largeFamilies = new Set(
-    Object.entries(familyCourseCounts)
-      .filter(([, count]) => count > FAMILY_SIZE_THRESHOLD)
-      .map(([fam]) => fam)
+    Object.entries(columnCountByFamily).filter(([, count]) => count > FAMILY_SIZE_THRESHOLD).map(([fam]) => fam)
   );
 
-  // Global min study_load per family — used as sort key so ordering is consistent across columns
+  // Global min study_load per family — purely a sort tiebreaker (spans always
+  // come from each course's own study_load).
   const familyMinLoad: Record<string, number> = {};
   sortedColumnKeys.forEach((colKey) => {
     (columns[colKey] ?? []).forEach((course) => {
@@ -235,7 +95,8 @@ export function buildLayout(courses: StructuredCourses): LayoutResult {
     });
   });
 
-  // Large families come before small families; within each group sort by min-load then name
+  // Large (>FAMILY_SIZE_THRESHOLD-column) families get first pick of rows;
+  // within each group sort by min-load then name.
   const compareFamilies = (a: string, b: string): number => {
     const aLarge = largeFamilies.has(a);
     const bLarge = largeFamilies.has(b);
@@ -244,38 +105,175 @@ export function buildLayout(courses: StructuredCourses): LayoutResult {
     return diff !== 0 ? diff : a.localeCompare(b);
   };
 
-  const compareCourses = (
-    a: { course_name: string; study_load: number },
-    b: { course_name: string; study_load: number }
-  ): number => {
-    const famCmp = compareFamilies(getFamily(a.course_name), getFamily(b.course_name));
-    if (famCmp !== 0) return famCmp;
-    return a.study_load - b.study_load;
-  };
+  // Schedules one group (non-specific or specific) across every column at
+  // once. For each family (in priority order) it finds the EARLIEST row that
+  // is simultaneously free in every column that family occupies — checking
+  // whatever's already been placed there — instead of pre-reserving fixed
+  // space per family. That's what lets a smaller family (e.g. "Interaction")
+  // slot into a gap left in front of a bigger one (e.g. "Development") when it
+  // actually fits, rather than leaving that gap empty.
+  function scheduleGroup(
+    matches: (course: any) => boolean,
+    floorByColumn: Record<string, number>
+  ): Record<string, PlacedCourse[]> {
+    const spanFor = (course: any) => Math.max(1, course.study_load);
 
-  let totalRows = 1;
-  const placement: Placement = {};
-
-  sortedColumnKeys.forEach((colKey) => {
-    const list = columns[colKey] ?? [];
-
-    // Non-specific courses on top, specific courses on the bottom
-    // Both groups sorted consistently so families land at similar rows across columns
-    const nonSpecific = list.filter((c) => !isSpecific(c)).sort(compareCourses);
-    const specific    = list.filter((c) =>  isSpecific(c)).sort(compareCourses);
-
-    const placed: PlacedCourse[] = [];
-    let row = 1;
-
-    [...nonSpecific, ...specific].forEach((course) => {
-      const rowSpan = Math.max(1, course.study_load);
-      placed.push({ course, rowStart: row, rowSpan });
-      row += rowSpan;
+    // A family can have more than one course in the same column (e.g.
+    // "Motion 3: 2D" and "Motion 3: 3D" both belong to family "motion" in the
+    // same semester) — group by column so those stack one after another
+    // instead of landing on top of each other.
+    const columnsByFamily: Record<string, Record<string, any[]>> = {};
+    sortedColumnKeys.forEach((colKey) => {
+      (columns[colKey] ?? []).filter(matches).forEach((course) => {
+        const fam = getFamily(course.course_name);
+        const byColumn = (columnsByFamily[fam] ??= {});
+        (byColumn[colKey] ??= []).push(course);
+      });
     });
 
-    totalRows = Math.max(totalRows, row - 1);
-    placement[colKey] = placed;
+    const placedByColumn: Record<string, PlacedCourse[]> = {};
+    sortedColumnKeys.forEach((colKey) => {
+      placedByColumn[colKey] = [];
+    });
+
+    Object.keys(columnsByFamily)
+      .sort(compareFamilies)
+      .forEach((fam) => {
+        const byColumn = columnsByFamily[fam];
+        const colKeys = Object.keys(byColumn);
+        const totalSpanFor = (colKey: string) => byColumn[colKey].reduce((sum, c) => sum + spanFor(c), 0);
+
+        let row = Math.max(1, ...colKeys.map((colKey) => floorByColumn[colKey] ?? 1));
+        while (row <= SEARCH_BOUND) {
+          const fits = colKeys.every((colKey) => !hasOverlap(placedByColumn[colKey], row, totalSpanFor(colKey)));
+          if (fits) break;
+          row++;
+        }
+
+        colKeys.forEach((colKey) => {
+          let cursor = row;
+          byColumn[colKey].forEach((course) => {
+            const span = spanFor(course);
+            placedByColumn[colKey].push({ course, rowStart: cursor, rowSpan: span });
+            cursor += span;
+          });
+        });
+      });
+
+    return placedByColumn;
+  }
+
+  // A column can still end up with an empty gap: e.g. a track needs to start
+  // late enough to line up with a taller column elsewhere, but this column
+  // has nothing else to put in the space that leaves behind. When that
+  // happens, and nothing was available to fill it, just close the gap by
+  // pulling everything below it up — that column's alignment with its
+  // siblings no longer holds for the shifted items, but there was nothing to
+  // align there anyway, and a solid block reads better than a dangling gap.
+  function compactColumn(placed: PlacedCourse[], floor: number): PlacedCourse[] {
+    let cursor = floor;
+    return [...placed]
+      .sort((a, b) => a.rowStart - b.rowStart)
+      .map((p) => {
+        const compacted = { ...p, rowStart: cursor };
+        cursor += p.rowSpan;
+        return compacted;
+      });
+  }
+
+  // Non-specific (generic) courses always occupy the top block, specific
+  // courses the block right below — the floor for the specific pass is each
+  // column's own generic block height, so the split still happens at (at
+  // least) that row everywhere, without forcing every column to match the
+  // single tallest one.
+  const nonSpecificPlaced = scheduleGroup((c) => !isSpecific(c), {});
+  sortedColumnKeys.forEach((colKey) => {
+    nonSpecificPlaced[colKey] = compactColumn(nonSpecificPlaced[colKey], 1);
   });
+
+  const floorByColumn: Record<string, number> = {};
+  sortedColumnKeys.forEach((colKey) => {
+    floorByColumn[colKey] = nonSpecificPlaced[colKey].reduce(
+      (max, p) => Math.max(max, p.rowStart + p.rowSpan),
+      1
+    );
+  });
+  const specificPlaced = scheduleGroup((c) => isSpecific(c), floorByColumn);
+  sortedColumnKeys.forEach((colKey) => {
+    specificPlaced[colKey] = compactColumn(specificPlaced[colKey], floorByColumn[colKey]);
+  });
+
+  const placement: Placement = {};
+  sortedColumnKeys.forEach((colKey) => {
+    placement[colKey] = [...nonSpecificPlaced[colKey], ...specificPlaced[colKey]];
+  });
+
+  // Overflow rule: a semester's total load can occasionally spike well past a
+  // normal one (bad source data, a one-off heavy semester). If that happens
+  // and another semester has trailing empty space — it's simply shorter,
+  // since every column shares one row count — move one of the overloaded
+  // semester's non-recurring courses to render inside that empty space
+  // instead of stretching the whole grid taller for everyone. The course
+  // still belongs to its real semester; only where its card is drawn moves.
+  const OVERFLOW_THRESHOLD = 60;
+
+  const columnHeight = (colKey: string) =>
+    placement[colKey].reduce((max, p) => Math.max(max, p.rowStart + p.rowSpan - 1), 0);
+
+  const heights: Record<string, number> = {};
+  sortedColumnKeys.forEach((colKey) => {
+    heights[colKey] = columnHeight(colKey);
+  });
+  const ceiling = Math.max(...Object.values(heights), 1);
+
+  // Removals are deferred and applied once at the end, per source column —
+  // compacting mid-loop would replace the placed entries with new objects,
+  // breaking the by-reference removal for any later candidate from that same
+  // snapshot.
+  const removedByColumn: Record<string, Set<PlacedCourse>> = {};
+  sortedColumnKeys.forEach((colKey) => {
+    removedByColumn[colKey] = new Set();
+  });
+
+  sortedColumnKeys.forEach((colKey, colIndex) => {
+    if (heights[colKey] <= OVERFLOW_THRESHOLD) return;
+
+    // Only relocate courses that don't recur elsewhere — moving a track item
+    // would break the row-alignment its other instances still rely on.
+    const candidates = [...placement[colKey]]
+      .filter((p) => columnCountByFamily[getFamily(p.course.course_name)] === 1)
+      .sort((a, b) => b.rowStart - a.rowStart);
+
+    for (const candidate of candidates) {
+      if (heights[colKey] <= OVERFLOW_THRESHOLD) break;
+
+      // Best-fit: the smallest gap that still fits it, nearest column first.
+      const target = sortedColumnKeys
+        .map((key, index) => ({ key, gap: ceiling - heights[key], distance: Math.abs(index - colIndex) }))
+        .filter(({ key, gap }) => key !== colKey && gap >= candidate.rowSpan)
+        .sort((a, b) => a.gap - b.gap || a.distance - b.distance)[0];
+      if (!target) continue;
+
+      removedByColumn[colKey].add(candidate);
+      heights[colKey] -= candidate.rowSpan;
+
+      placement[target.key] = [
+        ...placement[target.key],
+        { ...candidate, rowStart: heights[target.key] + 1 },
+      ];
+      heights[target.key] += candidate.rowSpan;
+    }
+  });
+
+  sortedColumnKeys.forEach((colKey) => {
+    if (removedByColumn[colKey].size === 0) return;
+    placement[colKey] = compactColumn(
+      placement[colKey].filter((p) => !removedByColumn[colKey].has(p)),
+      1
+    );
+  });
+
+  const totalRows = Math.max(...Object.values(heights), 1);
 
   return { placement, totalRows };
 }
