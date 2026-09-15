@@ -13,8 +13,8 @@ const syne = Syne({
 });
 
 export const metadata = {
-  title: "IMD Curriculum Manager",
-  description: "Manage IMD courses, ECTS and reports",
+  title: "GDM Curriculum Viewer",
+  description: "View GDM courses, ECTS and reports",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
