@@ -224,7 +224,6 @@ export function buildLayout(courses: StructuredCourses): LayoutResult {
   sortedColumnKeys.forEach((colKey) => {
     heights[colKey] = columnHeight(colKey);
   });
-  const ceiling = Math.max(...Object.values(heights), 1);
 
   // Removals are deferred and applied once at the end, per source column —
   // compacting mid-loop would replace the placed entries with new objects,
@@ -247,9 +246,17 @@ export function buildLayout(courses: StructuredCourses): LayoutResult {
     for (const candidate of candidates) {
       if (heights[colKey] <= OVERFLOW_THRESHOLD) break;
 
-      // Best-fit: the smallest gap that still fits it, nearest column first.
+      // Best-fit: the smallest genuine spare room (relative to a normal
+      // semester, not just "shorter than whatever's tallest right now" —
+      // otherwise a column already at the normal load could look like it has
+      // room to spare simply because the overloaded column is even taller)
+      // that still fits it, nearest column first.
       const target = sortedColumnKeys
-        .map((key, index) => ({ key, gap: ceiling - heights[key], distance: Math.abs(index - colIndex) }))
+        .map((key, index) => ({
+          key,
+          gap: OVERFLOW_THRESHOLD - heights[key],
+          distance: Math.abs(index - colIndex),
+        }))
         .filter(({ key, gap }) => key !== colKey && gap >= candidate.rowSpan)
         .sort((a, b) => a.gap - b.gap || a.distance - b.distance)[0];
       if (!target) continue;
