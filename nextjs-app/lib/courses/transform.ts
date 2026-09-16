@@ -36,6 +36,7 @@ export function buildStructuredCourses(
       study_load: parseInt(String(course.study_load)),
       study_programs: Array.isArray(course.study_programs) ? course.study_programs : [],
       is_generic: genericNames.has(course.course_name) || GENERIC_NAME_PATTERN.test(course.course_name),
+      traject,
       content: course.content || "",
       color: "",
       category: "",

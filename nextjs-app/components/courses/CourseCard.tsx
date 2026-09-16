@@ -1,93 +1,6 @@
 import Link from "next/link";
 import type { PlacedCourse } from "@/types/course";
-
-const PALETTE_STYLES: Record<
-  string,
-  { background: string; border: string; text: string; credit: string }
-> = {
-  // Every specific (single-programme) course family gets the same hue (blue),
-  // just a different shade — so unrelated families stay distinguishable while
-  // reading as one consistent color, and same-family courses (e.g.
-  // "Interaction 1" / "Interaction 2") land on the exact same shade.
-  "specific-1": {
-    background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
-    border: "#bfdbfe",
-    text: "#1e3a8a",
-    credit: "#1d4ed8",
-  },
-  "specific-2": {
-    background: "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)",
-    border: "#93c5fd",
-    text: "#1e3a8a",
-    credit: "#1d4ed8",
-  },
-  "specific-3": {
-    background: "linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%)",
-    border: "#60a5fa",
-    text: "#1e3a8a",
-    credit: "#1d4ed8",
-  },
-  "specific-4": {
-    background: "linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%)",
-    border: "#3b82f6",
-    text: "#0f2557",
-    credit: "#17356e",
-  },
-  "specific-5": {
-    background: "linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)",
-    border: "#2563eb",
-    text: "#ffffff",
-    credit: "rgba(255, 255, 255, 0.86)",
-  },
-  "specific-6": {
-    background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
-    border: "#1e40af",
-    text: "#ffffff",
-    credit: "rgba(255, 255, 255, 0.86)",
-  },
-  "nonspecific-shared": {
-    background: "linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%)",
-    border: "#fdba74",
-    text: "#7c2d12",
-    credit: "#9a3412",
-  },
-  "nonspecific-orange-1": {
-    background: "linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%)",
-    border: "#fdba74",
-    text: "#7c2d12",
-    credit: "#9a3412",
-  },
-  "nonspecific-orange-2": {
-    background: "linear-gradient(135deg, #fed7aa 0%, #fdba74 100%)",
-    border: "#fb923c",
-    text: "#7c2d12",
-    credit: "#9a3412",
-  },
-  "nonspecific-orange-3": {
-    background: "linear-gradient(135deg, #fdba74 0%, #fb923c 100%)",
-    border: "#f97316",
-    text: "#5f290f",
-    credit: "#7c2d12",
-  },
-  "nonspecific-orange-4": {
-    background: "linear-gradient(135deg, #fb923c 0%, #f97316 100%)",
-    border: "#ea580c",
-    text: "#ffffff",
-    credit: "rgba(255, 255, 255, 0.86)",
-  },
-  "light-grey": {
-    background: "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)",
-    border: "#d1d5db",
-    text: "#374151",
-    credit: "#6b7280",
-  },
-  default: {
-    background: "linear-gradient(135deg, #ffffff 0%, #e8eef6 100%)",
-    border: "#cbd5e1",
-    text: "#142033",
-    credit: "#5b6677",
-  },
-};
+import { CATEGORY_STYLES } from "@/lib/courses/colors";
 
 interface Props {
   entry: PlacedCourse;
@@ -102,7 +15,7 @@ export function CourseCard({
   columnSpan = 1,
   rowOffset = 0,
 }: Props) {
-  const palette = PALETTE_STYLES[course.category] ?? PALETTE_STYLES.default;
+  const palette = CATEGORY_STYLES[course.category] ?? CATEGORY_STYLES.default;
   const accentColor =
     course.study_programs.length > 1 ? "rgba(255, 255, 255, 0.8)" : "rgba(20, 32, 51, 0.22)";
   const showTooltipBelow = rowStart <= 3;

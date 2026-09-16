@@ -51,8 +51,8 @@ export default function TrajectPage() {
     }
 
     return (
-        <div>
-            <div className="imd-page pb-0 pt-4">
+        <div className="flex flex-col lg:h-[100dvh] lg:overflow-hidden">
+            <div className="imd-page shrink-0 pb-0 pt-4">
                 <section className="imd-hero mb-3 text-center">
                     <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
                       {trajectYear ? `Academiejaar ${trajectYear}` : "Opgeslagen curriculumweergave"}
@@ -60,7 +60,7 @@ export default function TrajectPage() {
                     <h1 className="mt-1 text-4xl font-bold tracking-[-0.03em] text-slate-900">{trajectName}</h1>
                 </section>
             </div>
-            <div className="imd-grid-wrap">
+            <div className="imd-grid-wrap min-h-0 flex-1">
                 <CourseGrid courses={courses} layout={layout} />
             </div>
         </div>
