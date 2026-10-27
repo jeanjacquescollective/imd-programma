@@ -84,6 +84,33 @@
     backdrop-filter: blur(18px);
   }
 
+  /* Large, always-visible horizontal scrollbar for the course grid below lg */
+  @media (max-width: 1023px) {
+    .imd-scroll-x::-webkit-scrollbar {
+      height: 14px;
+    }
+
+    .imd-scroll-x::-webkit-scrollbar-track {
+      background: rgba(197, 205, 216, 0.35);
+      border-radius: 9999px;
+    }
+
+    .imd-scroll-x::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.7);
+      border: 3px solid transparent;
+      border-radius: 9999px;
+      background-clip: padding-box;
+    }
+
+    /* Firefox (Chrome ignores the ::-webkit-scrollbar rules if these are set) */
+    @supports not selector(::-webkit-scrollbar) {
+      .imd-scroll-x {
+        scrollbar-width: auto;
+        scrollbar-color: rgba(100, 116, 139, 0.7) rgba(197, 205, 216, 0.35);
+      }
+    }
+  }
+
   .imd-card-hover {
     transition:
       transform 220ms cubic-bezier(0.4, 0, 0.2, 1),

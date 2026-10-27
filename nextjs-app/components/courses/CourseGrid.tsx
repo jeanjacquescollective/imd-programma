@@ -3,6 +3,8 @@ import { CourseCard } from "./CourseCard";
 
 const GRID_COLUMNS_PER_SEMESTER = 2;
 const HEADER_ROW_COUNT = 2;
+// Below lg the grid keeps this width per semester and scrolls horizontally instead of squashing
+const MOBILE_SEMESTER_MIN_WIDTH = 180;
 
 interface Props {
   courses: StructuredCourses;
@@ -68,13 +70,14 @@ export function CourseGrid({ courses, layout }: Props) {
 
   return (
     <div className="min-h-[70vh] w-full pt-5 lg:h-full lg:min-h-0 lg:overflow-visible lg:pt-0">
-      <div className="min-h-0 overflow-x-auto overflow-y-visible pb-2 lg:h-full lg:overflow-visible">
+      <div className="imd-scroll-x min-h-0 overflow-x-auto overflow-y-visible pb-2 lg:h-full lg:overflow-visible">
         <div
-          className="relative grid min-h-full gap-y-1 overflow-visible lg:h-full"
+          className="relative grid min-h-full min-w-[var(--grid-min-width)] gap-y-1 overflow-visible lg:h-full lg:min-w-0"
           style={{
             gridTemplateColumns,
             gridTemplateRows,
-          }}
+            "--grid-min-width": `${Math.max(labels.length, 1) * MOBILE_SEMESTER_MIN_WIDTH}px`,
+          } as React.CSSProperties}
         >
           {yearGroups.map(({ year, startColumn, columnSpan }) => (
             <div

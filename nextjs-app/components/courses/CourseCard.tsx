@@ -2,6 +2,12 @@ import Link from "next/link";
 import type { PlacedCourse } from "@/types/course";
 import { CATEGORY_STYLES } from "@/lib/courses/colors";
 
+// The grid column already shows the semester, so drop it from the displayed name
+// (e.g. "Photoshop semester 1" -> "Photoshop")
+function getDisplayName(name: string): string {
+  return name.replace(/\s*\(?\bsemester\s*\d+\)?\s*$/i, "").trim() || name;
+}
+
 interface Props {
   entry: PlacedCourse;
   columnStart?: number;
@@ -34,7 +40,7 @@ export function CourseCard({
     color: palette.text,
   }}
 >
-  <h2 className="pr-6 font-bold text-sm leading-tight">{course.course_name}</h2>
+  <h2 className="pr-6 font-bold text-sm leading-tight">{getDisplayName(course.course_name)}</h2>
 
   <div
     className="pointer-events-none absolute bottom-1.5 right-1.5 z-30 flex h-6 w-6 items-center justify-center rounded-full text-[8px] font-bold leading-none opacity-30"
