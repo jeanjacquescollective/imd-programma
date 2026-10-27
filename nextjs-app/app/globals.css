@@ -61,7 +61,7 @@
   }
 
   .imd-grid-wrap {
-    @apply w-full px-4 pb-10 sm:px-6 lg:px-8;
+    @apply w-full px-4 pb-2 sm:px-6 lg:px-8;
   }
 
   .imd-hero {

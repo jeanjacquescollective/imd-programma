@@ -12,11 +12,11 @@ function TrajectGrid({ traject, rawCourses }: { traject: string; rawCourses: Raw
   if (!layout || courses.length === 0) return null;
 
   return (
-    <section className="mb-12">
-      <div className="imd-page pb-0 pt-0">
+    <section className="mb-12 flex flex-col lg:h-[100dvh]">
+      <div className="imd-page shrink-0 pb-0 pt-0">
         <h2 className="mb-2 text-2xl font-bold tracking-[-0.02em] text-slate-900">{traject}</h2>
       </div>
-      <div className="imd-grid-wrap pb-0">
+      <div className="imd-grid-wrap min-h-0 flex-1">
         <CourseGrid courses={courses} layout={layout} />
       </div>
     </section>
